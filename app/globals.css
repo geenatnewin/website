@@ -105,7 +105,7 @@ html, body {
   width: fit-content;
   /* Fixed padding so hover never shifts layout */
   padding: 0 0.1em;
-  transition: color 0.2s, background-color 0.2s;
+  transition: opacity 0.2s;
   position: relative;
   transform: scaleY(0.78) scaleX(1.08);
   transform-origin: center;
@@ -114,8 +114,7 @@ html, body {
   font-size: clamp(4.8rem, 15.6vw, 15.6rem);
 }
 .home-nav-item:hover {
-  color: #000;
-  background-color: #fff;
+  opacity: 0.5;
 }
 
 /* ── SUBPAGES ── */
