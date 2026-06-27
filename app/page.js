@@ -41,8 +41,16 @@ export default function Portfolio() {
   const [lightboxSrc, setLightboxSrc] = useState(null)
   const [submitState, setSubmitState] = useState('idle')
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {})
+    const video = videoRef.current
+    if (!video) return
+    video.muted = true
+    video.setAttribute('playsinline', '')
+    video.setAttribute('webkit-playsinline', '')
+    const p = video.play()
+    if (p !== undefined) {
+      p.catch(() => {
+        document.addEventListener('touchstart', () => video.play(), { once: true })
+      })
     }
   }, [])
 
