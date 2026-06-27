@@ -1,4 +1,4 @@
-import { Barlow_Condensed, Inter } from 'next/font/google'
+import { Bebas_Neue, Inter } from 'next/font/google'
 import './globals.css'
 
 const inter = Inter({
@@ -7,9 +7,9 @@ const inter = Inter({
   variable: '--font-sans',
 })
 
-const barlowCondensed = Barlow_Condensed({
+const bebasNeue = Bebas_Neue({
   subsets: ['latin'],
-  weight: ['800', '900'],
+  weight: '400',
   variable: '--font-condensed',
 })
 
@@ -21,7 +21,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${barlowCondensed.variable}`}>
+      <body className={`${inter.variable} ${bebasNeue.variable}`}>
         {children}
       </body>
     </html>
