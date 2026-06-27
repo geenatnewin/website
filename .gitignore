@@ -4,6 +4,7 @@ out/
 node_modules/
 next-env.d.ts
 
-# Large video files — host these externally (Cloudflare R2, Vimeo, etc.)
-public/media/videos/
+# Original raw video files (too large for git)
 media/videos/
+
+.vercel
