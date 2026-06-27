@@ -105,7 +105,6 @@ html, body {
   width: fit-content;
   /* Fixed padding so hover never shifts layout */
   padding: 0 0.1em;
-  transition: color 0.2s;
 }
 .home-nav-item.nav-large {
   font-size: clamp(4.8rem, 15.6vw, 15.6rem);
