@@ -109,7 +109,7 @@ html, body {
   font-size: clamp(4.8rem, 15.6vw, 15.6rem);
 }
 .home-nav-item:hover {
-  color: #000;
+  opacity: 0.4;
 }
 
 /* ── SUBPAGES ── */
