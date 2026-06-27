@@ -98,7 +98,7 @@ html, body {
   font-weight: 900;
   line-height: 0.75;
   text-transform: uppercase;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.05em;
   color: var(--white);
   cursor: pointer;
   display: inline-block;
