@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const photoItems = [
   { label: 'Portrait Session',   sub: 'Portrait · 2024',     height: 'ph-tall'  },
@@ -36,9 +36,16 @@ const PlayIcon = () => (
 )
 
 export default function Portfolio() {
+  const videoRef = useRef(null)
   const [current, setCurrent] = useState('home')
   const [lightboxSrc, setLightboxSrc] = useState(null)
   const [submitState, setSubmitState] = useState('idle')
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {})
+    }
+  }, [])
+
   useEffect(() => {
     function onKeyDown(e) {
       if (e.key === 'Escape') setLightboxSrc(null)
@@ -91,7 +98,7 @@ export default function Portfolio() {
       {/* ── HOME ── */}
       <div className={`page${current === 'home' ? ' active' : ''}`} id="home">
         <div className="bg-media">
-          <video autoPlay muted loop playsInline>
+          <video ref={videoRef} autoPlay muted loop playsInline>
             <source src="https://pub-095a05fb51af4a3b83d5e05b40b59ff4.r2.dev/date2.mp4" type="video/mp4" />
           </video>
         </div>
