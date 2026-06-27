@@ -103,11 +103,13 @@ html, body {
   cursor: pointer;
   display: inline-block;
   width: fit-content;
-  /* Fixed padding so hover never shifts layout */
   padding: 0 0.1em;
 }
 .home-nav-item.nav-large {
   font-size: clamp(4.8rem, 15.6vw, 15.6rem);
+}
+.home-nav-item:hover {
+  color: #000;
 }
 
 /* ── SUBPAGES ── */
