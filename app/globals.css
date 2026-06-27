@@ -94,7 +94,7 @@ html, body {
 
 .home-nav-item {
   font-family: var(--condensed);
-  font-size: clamp(4rem, 13vw, 13rem);
+  font-size: clamp(3.2rem, 10.4vw, 10.4rem);
   font-weight: 900;
   line-height: 0.75;
   text-transform: uppercase;
@@ -111,7 +111,7 @@ html, body {
   transform-origin: center;
 }
 .home-nav-item.nav-large {
-  font-size: clamp(6rem, 19.5vw, 19.5rem);
+  font-size: clamp(4.8rem, 15.6vw, 15.6rem);
 }
 .home-nav-item:hover {
   color: #000;
@@ -320,7 +320,7 @@ html, body {
 
 /* Responsive */
 @media (max-width: 700px) {
-  .home-nav-item { font-size: clamp(3rem, 16vw, 5.5rem); }
+  .home-nav-item { font-size: clamp(2.4rem, 12.8vw, 4.4rem); }
   .masonry { columns: 2; }
   .video-grid { grid-template-columns: 1fr; }
   .sp-header { padding: 5rem 1.5rem 2rem; }
