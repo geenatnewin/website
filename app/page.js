@@ -230,7 +230,7 @@ export default function Portfolio() {
                 {submitState === 'sending' ? 'Sending…' : 'Send'}
               </button>
               {submitState === 'success' && (
-                <p className="form-success">Message sent — I&apos;ll be in touch soon.</p>
+                <p className="form-success">Message sent - I&apos;ll be in touch soon!</p>
               )}
               {submitState === 'error' && (
                 <p className="form-error">Something went wrong. Please try again.</p>
