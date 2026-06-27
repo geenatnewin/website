@@ -92,9 +92,8 @@ export default function Portfolio() {
       {/* ── HOME ── */}
       <div className={`page${current === 'home' ? ' active' : ''}`} id="home">
         <div className="bg-media">
-          {/* Replace the src below with your hosted video URL (e.g. Cloudflare R2) */}
           <video autoPlay muted loop playsInline>
-            <source src="/media/videos/date2.mp4" type="video/mp4" />
+            <source src="https://pub-095a05fb51af4a3b83d5e05b40b59ff4.r2.dev/date2.mp4" type="video/mp4" />
           </video>
         </div>
         <div className="home-logo">Navin Nguyen</div>
