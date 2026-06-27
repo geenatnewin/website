@@ -39,6 +39,13 @@ export default function Portfolio() {
   const [current, setCurrent] = useState('home')
   const [lightboxSrc, setLightboxSrc] = useState(null)
   const [submitState, setSubmitState] = useState('idle')
+  const [hoveredNav, setHoveredNav] = useState(null)
+
+  const navHover = (id) => ({ color: hoveredNav === id ? '#000' : '' })
+  const navProps = (id) => ({
+    onMouseEnter: () => setHoveredNav(id),
+    onMouseLeave: () => setHoveredNav(null),
+  })
 
   useEffect(() => {
     function onKeyDown(e) {
@@ -98,17 +105,10 @@ export default function Portfolio() {
         </div>
         <div className="home-logo">Navin Nguyen</div>
         <nav className="home-nav">
-          <span className="home-nav-item nav-large" onClick={() => goTo('photos')}>Photos</span>
-          <span className="home-nav-item nav-large" onClick={() => goTo('videos')}>Videos</span>
-          <a
-            className="home-nav-item"
-            href="https://www.instagram.com/ng.navin/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Instagram
-          </a>
-          <span className="home-nav-item" onClick={() => goTo('contact')}>Contact</span>
+          <span className="home-nav-item nav-large" style={navHover('photos')} {...navProps('photos')} onClick={() => goTo('photos')}>Photos</span>
+          <span className="home-nav-item nav-large" style={navHover('videos')} {...navProps('videos')} onClick={() => goTo('videos')}>Videos</span>
+          <a className="home-nav-item" style={navHover('instagram')} {...navProps('instagram')} href="https://www.instagram.com/ng.navin/" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <span className="home-nav-item" style={navHover('contact')} {...navProps('contact')} onClick={() => goTo('contact')}>Contact</span>
         </nav>
       </div>
 
