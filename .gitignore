@@ -1,2 +1,9 @@
+# Next.js
+.next/
+out/
+node_modules/
+next-env.d.ts
+
 # Large video files — host these externally (Cloudflare R2, Vimeo, etc.)
+public/media/videos/
 media/videos/
