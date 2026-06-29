@@ -1,30 +1,86 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 
-const photoItems = [
-  { label: 'Portrait Session',   sub: 'Portrait · 2024',     height: 'ph-tall'  },
-  { label: 'Editorial Spread',   sub: 'Editorial · 2024',    height: 'ph-mid'   },
-  { label: 'Landscape Series',   sub: 'Landscape · 2024',    height: 'ph-tall'  },
-  { label: 'Commercial Product', sub: 'Commercial · 2024',   height: 'ph-wide'  },
-  { label: 'Wedding Editorial',  sub: 'Wedding · 2023',      height: 'ph-short' },
-  { label: 'Architecture Study', sub: 'Architecture · 2023', height: 'ph-mid'   },
-  { label: 'Concert Coverage',   sub: 'Concert · 2023',      height: 'ph-tall'  },
-  { label: 'Fashion Shoot',      sub: 'Fashion · 2023',      height: 'ph-wide'  },
-  { label: 'Street Series',      sub: 'Street · 2023',       height: 'ph-short' },
+const lifePhotos = [
+  '4I0A2752.jpg','4I0A2762.jpg','4I0A2920.jpg','4I0A3050.jpg',
+  '4I0A3078.jpg','4I0A3269.jpg','DSC05766.jpg','DSC05777.jpg',
+  'IMG_0007.jpg','IMG_0095.jpg','IMG_0097.jpg','IMG_0099.jpg',
 ]
 
-const PlaceholderIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.2">
-    <rect x="3" y="3" width="18" height="18" rx="2"/>
-    <circle cx="8.5" cy="8.5" r="1.5"/>
-    <polyline points="21 15 16 10 5 21"/>
-  </svg>
-)
+const musicPhotos = [
+  '4I0A4054.jpg','4I0A4131.jpg','4I0A4187.jpg','4I0A4243.jpg',
+  '4I0A4269.jpg','4I0A4270.jpg','4I0A4620.jpg','4I0A4775-2.jpg',
+  '4I0A4881.jpg','4I0A5352.jpg','4I0A5356.jpg','4I0A5385.jpg',
+  '4I0A5412.jpg','4I0A5420.jpg','4I0A5498.jpg','4I0A5538.jpg',
+  '4I0A5596.jpg','4I0A5605.jpg','4I0A5728.jpg','4I0A5842.jpg',
+  '4I0A5870.jpg','4I0A5904.jpg','4I0A5972.jpg','4I0A6048.jpg',
+  '4I0A6117.jpg','4I0A6119.jpg','4I0A6124.jpg','DSC06058.jpg',
+  'IMG_3276.jpg','IMG_3288.jpg','IMG_3340.jpg',
+]
+
+function Carousel({ title, folder, files, active, onActivate, onOpenLightbox }) {
+  const trackRef = useRef(null)
+  const [index, setIndex] = useState(0)
+
+  const goTo = useCallback((next) => {
+    const clamped = Math.max(0, Math.min(next, files.length - 1))
+    setIndex(clamped)
+    const track = trackRef.current
+    if (!track) return
+    const items = track.querySelectorAll('.carousel-item')
+    if (items[clamped]) {
+      items[clamped].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
+    }
+  }, [files.length])
+
+  useEffect(() => {
+    if (!active) return
+    const onKey = (e) => {
+      if (e.key === 'ArrowRight') goTo(index + 1)
+      if (e.key === 'ArrowLeft')  goTo(index - 1)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [active, index, goTo])
+
+  return (
+    <div className="carousel-section" onClick={onActivate}>
+      <h2 className={`section-title${active ? ' section-title-active' : ''}`}>{title}</h2>
+      <div className="carousel-wrap">
+        <button
+          className="carousel-arrow carousel-arrow-left"
+          onClick={(e) => { e.stopPropagation(); onActivate(); goTo(index - 1) }}
+          aria-label="Previous"
+        >&#8592;</button>
+
+        <div className="carousel-track" ref={trackRef}>
+          {files.map((file, i) => (
+            <div
+              key={i}
+              className={`carousel-item${i === index ? ' carousel-item-active' : ''}`}
+              onClick={(e) => { e.stopPropagation(); onActivate(); goTo(i); onOpenLightbox(`/media/pics/${folder}/${file}`) }}
+            >
+              <img src={`/media/pics/${folder}/${file}`} alt="" loading="lazy" />
+            </div>
+          ))}
+        </div>
+
+        <button
+          className="carousel-arrow carousel-arrow-right"
+          onClick={(e) => { e.stopPropagation(); onActivate(); goTo(index + 1) }}
+          aria-label="Next"
+        >&#8594;</button>
+      </div>
+      <div className="carousel-counter">{index + 1} / {files.length}</div>
+    </div>
+  )
+}
 
 export default function Photos() {
   const [lightboxSrc, setLightboxSrc] = useState(null)
+  const [activeSection, setActiveSection] = useState('life')
 
   return (
     <>
@@ -38,21 +94,22 @@ export default function Photos() {
             <h1 className="sp-title">Photos</h1>
           </div>
           <div id="photos-inner">
-            <div className="masonry">
-              {photoItems.map((item, i) => (
-                <div key={i} className="masonry-item" onClick={() => setLightboxSrc(null)}>
-                  <div className={`media-placeholder ${item.height}`}>
-                    <PlaceholderIcon />
-                    <span>{item.sub}</span>
-                  </div>
-                  <div className="item-overlay">
-                    <div className="item-meta">
-                      <p className="item-label">{item.label}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Carousel
+              title="Life"
+              folder="LIFE"
+              files={lifePhotos}
+              active={activeSection === 'life'}
+              onActivate={() => setActiveSection('life')}
+              onOpenLightbox={setLightboxSrc}
+            />
+            <Carousel
+              title="Music"
+              folder="MUSIC"
+              files={musicPhotos}
+              active={activeSection === 'music'}
+              onActivate={() => setActiveSection('music')}
+              onOpenLightbox={setLightboxSrc}
+            />
           </div>
         </div>
       </div>
