@@ -11,6 +11,8 @@ const eventVideos = [
   { src: `${R2}/horizontal00185628.mp4`, title: 'Cloone' },
   { src: `${R2}/30k.mp4`,               title: 'PALACIO'      },
   { src: `${R2}/cover9.mp4`,            title: 'PALACIO II'   },
+  { src: `${R2}/akilla.mp4`,            title: 'AKILLA'       },
+  { src: `${R2}/akilla2.mp4`,           title: 'AKILLA II'    },
 ]
 
 const musicVideos = []
