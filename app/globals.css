@@ -1,3 +1,9 @@
+@font-face {
+  font-family: 'Kabisat';
+  src: url('/fonts/KabisatDemo-ItalicTall.ttf') format('truetype');
+  font-display: swap;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -6,8 +12,7 @@
   --gray-bg: #F5F4F2;
   --gray-light: #E8E8E8;
   --gray-mid: #888;
-  --condensed: var(--font-condensed), 'Arial Narrow', sans-serif;
-  --kabisat: var(--font-kabisat), serif;
+  --kabisat: 'Kabisat', serif;
   --sans: var(--font-sans), system-ui, sans-serif;
 }
 

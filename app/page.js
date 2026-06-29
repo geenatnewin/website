@@ -13,16 +13,22 @@ export default function Home() {
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', '')
 
-    const tryPlay = () => video.play().catch(() => {})
+    const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0
 
-    document.addEventListener('touchstart', tryPlay, { once: true })
-    document.addEventListener('click', tryPlay, { once: true })
+    if (isMobile) {
+      video.addEventListener('loadeddata', () => {
+        video.currentTime = 0.001
+      }, { once: true })
+      document.addEventListener('touchstart', () => video.play().catch(() => {}), { once: true })
+    } else {
+      video.play().catch(() => {})
+    }
   }, [])
 
   return (
     <div className="page active" id="home">
       <div className="bg-media">
-        <video ref={videoRef} muted loop playsInline preload="auto">
+        <video ref={videoRef} muted loop playsInline preload="auto" autoPlay>
           <source src="https://pub-095a05fb51af4a3b83d5e05b40b59ff4.r2.dev/vcftest.mp4" type="video/mp4" />
         </video>
         <div className="video-block-overlay" />
