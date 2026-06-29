@@ -112,9 +112,9 @@ html, body {
 
 .home-nav-item {
   font-family: var(--kabisat);
-  font-size: clamp(3.2rem, 10.4vw, 10.4rem);
+  font-size: clamp(1.8rem, 5.5vw, 5.5rem);
   font-weight: 900;
-  line-height: 0.75;
+  line-height: 1;
   text-transform: uppercase;
   letter-spacing: -0.05em;
   color: var(--white);
@@ -124,7 +124,7 @@ html, body {
   padding: 0 0.1em;
 }
 .home-nav-item.nav-large {
-  font-size: clamp(4.8rem, 15.6vw, 15.6rem);
+  font-size: clamp(2.6rem, 8vw, 8rem);
 }
 .home-nav-item {
   filter: blur(0.6px);
