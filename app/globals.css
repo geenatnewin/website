@@ -108,8 +108,12 @@ html, body {
 .home-nav-item.nav-large {
   font-size: clamp(4.8rem, 15.6vw, 15.6rem);
 }
+.home-nav-item {
+  filter: blur(0.6px);
+  transition: filter 0.3s ease;
+}
 .home-nav-item:hover {
-  filter: invert(1) blur(1px);
+  filter: invert(1) blur(2px);
 }
 
 /* ── SUBPAGES ── */
