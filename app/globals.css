@@ -128,7 +128,7 @@ html, body {
   font-size: clamp(3.6rem, 11vw, 11rem);
 }
 .home-nav-item {
-  filter: blur(0.6px);
+  filter: blur(0.35px);
   transition: filter 0.3s ease;
 }
 .home-nav-item:hover {
