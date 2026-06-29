@@ -7,6 +7,7 @@
   --gray-light: #E8E8E8;
   --gray-mid: #888;
   --condensed: var(--font-condensed), 'Arial Narrow', sans-serif;
+  --kabisat: var(--font-kabisat), serif;
   --sans: var(--font-sans), system-ui, sans-serif;
 }
 
@@ -105,7 +106,7 @@ html, body {
 }
 
 .home-nav-item {
-  font-family: var(--condensed);
+  font-family: var(--kabisat);
   font-size: clamp(3.2rem, 10.4vw, 10.4rem);
   font-weight: 900;
   line-height: 0.75;
@@ -167,7 +168,7 @@ html, body {
   margin-bottom: 2.5rem;
 }
 .sp-title {
-  font-family: var(--condensed);
+  font-family: var(--kabisat);
   font-size: clamp(3rem, 8vw, 7rem);
   font-weight: 900;
   text-transform: uppercase;

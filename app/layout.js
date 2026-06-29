@@ -1,4 +1,5 @@
-import { Bebas_Neue, Inter } from 'next/font/google'
+import { Inter } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
 
 const inter = Inter({
@@ -7,10 +8,9 @@ const inter = Inter({
   variable: '--font-sans',
 })
 
-const bebasNeue = Bebas_Neue({
-  subsets: ['latin'],
-  weight: '400',
-  variable: '--font-condensed',
+const kabisat = localFont({
+  src: '../public/fonts/KabisatDemo-ItalicTall.ttf',
+  variable: '--font-kabisat',
 })
 
 export const metadata = {
@@ -21,7 +21,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${bebasNeue.variable}`}>
+      <body className={`${inter.variable} ${kabisat.variable}`}>
         {children}
       </body>
     </html>
