@@ -1,6 +1,6 @@
 @font-face {
-  font-family: 'Kabisat';
-  src: url('/fonts/KabisatDemo-ItalicTall.ttf') format('truetype');
+  font-family: 'SuperSunshine';
+  src: url('/fonts/SuperSunshine.ttf') format('truetype');
   font-display: swap;
 }
 
@@ -12,7 +12,7 @@
   --gray-bg: #F5F4F2;
   --gray-light: #E8E8E8;
   --gray-mid: #888;
-  --kabisat: 'Kabisat', serif;
+  --kabisat: 'SuperSunshine', serif;
   --sans: var(--font-sans), system-ui, sans-serif;
 }
 
