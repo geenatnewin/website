@@ -6,9 +6,9 @@ import Link from 'next/link'
 const R2 = 'https://pub-095a05fb51af4a3b83d5e05b40b59ff4.r2.dev'
 
 const eventVideos = [
-  { src: `${R2}/bushbabyyy13.mp4`,       title: 'Bush Baby' },
+  { src: `${R2}/bushbabyyy13.mp4`,       title: 'Bush Baby'   },
   { src: `${R2}/bushbabyyy25.mp4`,       title: 'Bush Baby II' },
-  { src: `${R2}/horizontal00185628.mp4`, title: 'Horizontal' },
+  { src: `${R2}/horizontal00185628.mp4`, title: 'Horizontal'  },
 ]
 
 const musicVideos = []
@@ -17,9 +17,7 @@ const PlayIcon = () => (
   <svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11" fill="white"/></svg>
 )
 
-function VideoSection({ title, videos }) {
-  const [lightbox, setLightbox] = useState(null)
-
+function VideoSection({ title, videos, onPlay }) {
   if (videos.length === 0) return (
     <div className="video-section">
       <h2 className="section-title">{title}</h2>
@@ -32,9 +30,9 @@ function VideoSection({ title, videos }) {
       <h2 className="section-title">{title}</h2>
       <div className="video-grid">
         {videos.map((v, i) => (
-          <div key={i} className="video-card" onClick={() => setLightbox(v.src)}>
+          <div key={i} className="video-card" onClick={() => onPlay(v.src)}>
             <div className="video-card-thumb">
-              <video src={v.src} preload="metadata" muted playsInline />
+              <div className="vph" style={{ position: 'absolute', inset: 0 }} />
               <div className="play-icon"><PlayIcon /></div>
             </div>
             <div className="video-card-info">
@@ -44,20 +42,13 @@ function VideoSection({ title, videos }) {
           </div>
         ))}
       </div>
-
-      {lightbox && (
-        <div className="lightbox open" onClick={(e) => { if (e.target === e.currentTarget) setLightbox(null) }}>
-          <div className="lightbox-inner" style={{ maxWidth: '960px' }}>
-            <button className="lightbox-close" onClick={() => setLightbox(null)}>✕</button>
-            <video src={lightbox} controls autoPlay playsInline style={{ width: '100%', maxHeight: '85vh' }} />
-          </div>
-        </div>
-      )}
     </div>
   )
 }
 
 export default function Videos() {
+  const [lightbox, setLightbox] = useState(null)
+
   return (
     <>
       <Link href="/" className="back-btn visible">
@@ -70,11 +61,42 @@ export default function Videos() {
             <h1 className="sp-title">Videos</h1>
           </div>
           <div id="videos-inner">
-            <VideoSection title="Event" videos={eventVideos} />
-            <VideoSection title="Music" videos={musicVideos} />
+            <VideoSection title="Event" videos={eventVideos} onPlay={setLightbox} />
+            <VideoSection title="Music" videos={musicVideos} onPlay={setLightbox} />
           </div>
         </div>
       </div>
+
+      {lightbox && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 2000,
+            background: 'rgba(0,0,0,0.96)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '2rem',
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setLightbox(null) }}
+        >
+          <div style={{ position: 'relative', width: '100%', maxWidth: '960px' }}>
+            <button
+              onClick={() => setLightbox(null)}
+              style={{
+                position: 'absolute', top: '-2.5rem', right: 0,
+                background: 'none', border: 'none', color: 'white',
+                fontSize: '1.25rem', cursor: 'pointer', opacity: 0.6,
+              }}
+            >✕</button>
+            <video
+              key={lightbox}
+              src={lightbox}
+              controls
+              autoPlay
+              playsInline
+              style={{ width: '100%', maxHeight: '80vh', display: 'block', background: '#000' }}
+            />
+          </div>
+        </div>
+      )}
     </>
   )
 }
