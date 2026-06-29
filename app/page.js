@@ -12,6 +12,13 @@ export default function Home() {
     video.muted = true
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', '')
+    video.style.opacity = '0'
+
+    const onPlaying = () => {
+      video.style.transition = 'opacity 0.6s ease'
+      video.style.opacity = '1'
+    }
+    video.addEventListener('playing', onPlaying)
 
     const tryPlay = () => {
       video.play().catch(() => {})
@@ -25,6 +32,8 @@ export default function Home() {
 
     document.addEventListener('touchstart', tryPlay, { once: true })
     document.addEventListener('click', tryPlay, { once: true })
+
+    return () => video.removeEventListener('playing', onPlaying)
   }, [])
 
   return (
