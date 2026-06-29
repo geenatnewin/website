@@ -393,3 +393,10 @@ html, body {
   .sp-header { padding: 5rem 1.5rem 2rem; }
   #photos-inner, #videos-inner, #contact-inner { padding: 0 1.5rem 3rem; }
 }
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .home-logo { font-size: 0.7rem; top: 1rem; }
+  .home-nav { gap: 0.1rem; }
+  .home-nav-item { font-size: clamp(1.6rem, 7vh, 3rem); filter: none; }
+  .home-nav-item.nav-large { font-size: clamp(2rem, 9vh, 3.8rem); }
+}
