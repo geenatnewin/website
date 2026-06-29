@@ -95,19 +95,19 @@ export default function Photos() {
           </div>
           <div id="photos-inner">
             <Carousel
+              title="Event"
+              folder="MUSIC"
+              files={musicPhotos}
+              active={activeSection === 'music'}
+              onActivate={() => setActiveSection('music')}
+              onOpenLightbox={setLightboxSrc}
+            />
+            <Carousel
               title="Life"
               folder="LIFE"
               files={lifePhotos}
               active={activeSection === 'life'}
               onActivate={() => setActiveSection('life')}
-              onOpenLightbox={setLightboxSrc}
-            />
-            <Carousel
-              title="Music"
-              folder="MUSIC"
-              files={musicPhotos}
-              active={activeSection === 'music'}
-              onActivate={() => setActiveSection('music')}
               onOpenLightbox={setLightboxSrc}
             />
           </div>
