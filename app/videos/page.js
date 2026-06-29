@@ -9,6 +9,7 @@ const eventVideos = [
   { src: `${R2}/bushbabyyy13.mp4`,       title: 'Bush Baby'    },
   { src: `${R2}/bushbabyyy25.mp4`,       title: 'Bush Baby II' },
   { src: `${R2}/horizontal00185628.mp4`, title: 'Horizontal'   },
+  { src: `${R2}/30k.mp4`,               title: 'PALACIO'      },
 ]
 
 const musicVideos = []
