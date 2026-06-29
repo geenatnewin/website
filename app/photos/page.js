@@ -14,7 +14,7 @@ const musicPhotos = [
   '4I0A4269.jpg','4I0A4270.jpg','4I0A4620.jpg','4I0A4775-2.jpg',
   '4I0A4881.jpg','4I0A5352.jpg','4I0A5356.jpg','4I0A5385.jpg',
   '4I0A5412.jpg','4I0A5420.jpg','4I0A5498.jpg','4I0A5538.jpg',
-  '4I0A5596.jpg','4I0A5605.jpg','4I0A5728.jpg','4I0A5842.jpg',
+  '4I0A5596.jpg','4I0A5605.jpg','4I0A5842.jpg',
   '4I0A5870.jpg','4I0A5904.jpg','4I0A5972.jpg','4I0A6048.jpg',
   '4I0A6117.jpg','4I0A6119.jpg','4I0A6124.jpg','DSC06058.jpg',
   'IMG_3276.jpg','IMG_3288.jpg','IMG_3340.jpg',
