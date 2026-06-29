@@ -26,6 +26,7 @@ export default function Home() {
         <video ref={videoRef} autoPlay muted loop playsInline>
           <source src="https://pub-095a05fb51af4a3b83d5e05b40b59ff4.r2.dev/vcftest.mp4" type="video/mp4" />
         </video>
+        <div className="video-block-overlay" />
       </div>
       <div className="home-logo">Navin Nguyen</div>
       <nav className="home-nav">
