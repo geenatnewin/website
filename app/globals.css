@@ -50,6 +50,12 @@ html, body {
   object-fit: cover;
   display: block;
 }
+.bg-media video::-webkit-media-controls,
+.bg-media video::-webkit-media-controls-start-playback-button,
+.bg-media video::-webkit-media-controls-panel {
+  display: none !important;
+  opacity: 0 !important;
+}
 .bg-media::after {
   content: '';
   position: absolute;
