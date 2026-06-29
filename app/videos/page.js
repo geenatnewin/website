@@ -1,14 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 
 const R2 = 'https://pub-095a05fb51af4a3b83d5e05b40b59ff4.r2.dev'
 
 const eventVideos = [
-  { src: `${R2}/bushbabyyy13.mp4`,       title: 'Bush Baby'   },
+  { src: `${R2}/bushbabyyy13.mp4`,       title: 'Bush Baby'    },
   { src: `${R2}/bushbabyyy25.mp4`,       title: 'Bush Baby II' },
-  { src: `${R2}/horizontal00185628.mp4`, title: 'Horizontal'  },
+  { src: `${R2}/horizontal00185628.mp4`, title: 'Horizontal'   },
 ]
 
 const musicVideos = []
@@ -16,6 +16,29 @@ const musicVideos = []
 const PlayIcon = () => (
   <svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11" fill="white"/></svg>
 )
+
+function VideoThumb({ src }) {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const v = ref.current
+    if (!v) return
+    const onMeta = () => { v.currentTime = 1 }
+    v.addEventListener('loadedmetadata', onMeta)
+    return () => v.removeEventListener('loadedmetadata', onMeta)
+  }, [])
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      preload="metadata"
+      muted
+      playsInline
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+    />
+  )
+}
 
 function VideoSection({ title, videos, onPlay }) {
   if (videos.length === 0) return (
@@ -32,7 +55,7 @@ function VideoSection({ title, videos, onPlay }) {
         {videos.map((v, i) => (
           <div key={i} className="video-card" onClick={() => onPlay(v.src)}>
             <div className="video-card-thumb">
-              <div className="vph" style={{ position: 'absolute', inset: 0 }} />
+              <VideoThumb src={v.src} />
               <div className="play-icon"><PlayIcon /></div>
             </div>
             <div className="video-card-info">
