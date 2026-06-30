@@ -13,11 +13,9 @@ export default function Home() {
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', '')
 
-    video.play().catch(() => {
-      video.addEventListener('loadeddata', () => {
-        video.currentTime = 0.001
-      }, { once: true })
-    })
+    const tryPlay = () => video.play().catch(() => {})
+    tryPlay()
+    document.addEventListener('touchstart', tryPlay, { once: true })
   }, [])
 
   return (

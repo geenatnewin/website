@@ -60,6 +60,7 @@ html, body {
 }
 .bg-media video::-webkit-media-controls,
 .bg-media video::-webkit-media-controls-start-playback-button,
+.bg-media video::-webkit-media-controls-overlay-play-button,
 .bg-media video::-webkit-media-controls-panel {
   display: none !important;
   opacity: 0 !important;
