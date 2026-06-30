@@ -5,6 +5,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+* { -webkit-tap-highlight-color: transparent; }
 
 :root {
   --white: #FFFFFF;
@@ -141,10 +142,17 @@ html, body {
 }
 .home-nav-item {
   filter: blur(0.35px);
-  transition: filter 0.3s ease;
+  transition: filter 0.3s ease, transform 0.15s ease;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
 }
 .home-nav-item:hover {
   filter: invert(1) blur(2px);
+}
+.home-nav-item:active {
+  transform: scaleX(1.4) scale(1.08);
+  filter: blur(0.35px);
 }
 
 /* ── SUBPAGES ── */
