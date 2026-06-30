@@ -30,9 +30,11 @@ export default function Contact() {
   return (
     <>
       <div className="page active">
-        <Link href="/" className="back-btn visible">
-          <span className="back-arrow">←</span> Back
-        </Link>
+        <div className="back-bar">
+          <Link href="/" className="back-btn visible">
+            <span className="back-arrow">←</span> Back
+          </Link>
+        </div>
         <div className="subpage">
           <div className="sp-header">
             <h1 className="sp-title">Contact</h1>

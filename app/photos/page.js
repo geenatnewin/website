@@ -45,6 +45,8 @@ function Carousel({ title, folder, files, active, onActivate, onOpenLightbox }) 
     return () => window.removeEventListener('keydown', onKey)
   }, [active, index, goTo])
 
+  const images = files.map(f => `/media/pics/${folder}/${f}`)
+
   return (
     <div className="carousel-section" onClick={onActivate}>
       <h2 className={`section-title${active ? ' section-title-active' : ''}`}>{title}</h2>
@@ -60,9 +62,9 @@ function Carousel({ title, folder, files, active, onActivate, onOpenLightbox }) 
             <div
               key={i}
               className={`carousel-item${i === index ? ' carousel-item-active' : ''}`}
-              onClick={(e) => { e.stopPropagation(); onActivate(); goTo(i); onOpenLightbox(`/media/pics/${folder}/${file}`) }}
+              onClick={(e) => { e.stopPropagation(); onActivate(); goTo(i); onOpenLightbox(i, images) }}
             >
-              <img src={`/media/pics/${folder}/${file}`} alt="" loading="lazy" />
+              <img src={images[i]} alt="" loading="lazy" />
             </div>
           ))}
         </div>
@@ -79,15 +81,40 @@ function Carousel({ title, folder, files, active, onActivate, onOpenLightbox }) 
 }
 
 export default function Photos() {
-  const [lightboxSrc, setLightboxSrc] = useState(null)
+  const [lightbox, setLightbox] = useState(null)
   const [activeSection, setActiveSection] = useState('life')
+  const touchStartX = useRef(null)
+
+  const lightboxPrev = useCallback(() => {
+    setLightbox(l => l && l.index > 0 ? { ...l, index: l.index - 1 } : l)
+  }, [])
+
+  const lightboxNext = useCallback(() => {
+    setLightbox(l => l && l.index < l.images.length - 1 ? { ...l, index: l.index + 1 } : l)
+  }, [])
+
+  useEffect(() => {
+    const onKey = (e) => {
+      setLightbox(l => {
+        if (!l) return l
+        if (e.key === 'Escape') return null
+        if (e.key === 'ArrowRight') return l.index < l.images.length - 1 ? { ...l, index: l.index + 1 } : l
+        if (e.key === 'ArrowLeft') return l.index > 0 ? { ...l, index: l.index - 1 } : l
+        return l
+      })
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <>
       <div className="page active">
-        <Link href="/" className="back-btn visible">
-          <span className="back-arrow">←</span> Back
-        </Link>
+        <div className="back-bar">
+          <Link href="/" className="back-btn visible">
+            <span className="back-arrow">←</span> Back
+          </Link>
+        </div>
         <div className="subpage">
           <div className="sp-header">
             <h1 className="sp-title">Photos</h1>
@@ -99,7 +126,7 @@ export default function Photos() {
               files={musicPhotos}
               active={activeSection === 'music'}
               onActivate={() => setActiveSection('music')}
-              onOpenLightbox={setLightboxSrc}
+              onOpenLightbox={(i, images) => setLightbox({ images, index: i })}
             />
             <Carousel
               title="Life"
@@ -107,17 +134,33 @@ export default function Photos() {
               files={lifePhotos}
               active={activeSection === 'life'}
               onActivate={() => setActiveSection('life')}
-              onOpenLightbox={setLightboxSrc}
+              onOpenLightbox={(i, images) => setLightbox({ images, index: i })}
             />
           </div>
         </div>
       </div>
 
-      {lightboxSrc && (
-        <div className="lightbox open" onClick={(e) => { if (e.target === e.currentTarget) setLightboxSrc(null) }}>
+      {lightbox && (
+        <div
+          className="lightbox open"
+          onClick={(e) => { if (e.target === e.currentTarget) setLightbox(null) }}
+          onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX }}
+          onTouchEnd={(e) => {
+            const diff = touchStartX.current - e.changedTouches[0].clientX
+            if (Math.abs(diff) > 50) { diff > 0 ? lightboxNext() : lightboxPrev() }
+            touchStartX.current = null
+          }}
+        >
           <div className="lightbox-inner">
-            <button className="lightbox-close" onClick={() => setLightboxSrc(null)}>✕</button>
-            <img src={lightboxSrc} alt="" />
+            <button className="lightbox-close" onClick={() => setLightbox(null)}>✕</button>
+            {lightbox.index > 0 && (
+              <button className="lightbox-prev" onClick={lightboxPrev}>&#8249;</button>
+            )}
+            {lightbox.index < lightbox.images.length - 1 && (
+              <button className="lightbox-next" onClick={lightboxNext}>&#8250;</button>
+            )}
+            <img src={lightbox.images[lightbox.index]} alt="" />
+            <div className="lightbox-counter">{lightbox.index + 1} / {lightbox.images.length}</div>
           </div>
         </div>
       )}
