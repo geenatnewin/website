@@ -13,16 +13,11 @@ export default function Home() {
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', '')
 
-    const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0
-
-    if (isMobile) {
+    video.play().catch(() => {
       video.addEventListener('loadeddata', () => {
         video.currentTime = 0.001
       }, { once: true })
-      document.addEventListener('touchstart', () => video.play().catch(() => {}), { once: true })
-    } else {
-      video.play().catch(() => {})
-    }
+    })
   }, [])
 
   return (
