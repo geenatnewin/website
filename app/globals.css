@@ -150,10 +150,6 @@ html, body {
 .home-nav-item:hover {
   filter: invert(1) blur(2px);
 }
-.home-nav-item:active {
-  transform: scaleX(1.4) scale(1.08);
-  filter: blur(0.35px);
-}
 
 /* ── SUBPAGES ── */
 .back-bar {
@@ -452,6 +448,7 @@ html, body {
   .home-nav { gap: 0rem; }
   .home-nav-item { font-size: clamp(1.8rem, 9vw, 3rem); filter: none; }
   .home-nav-item.nav-large { font-size: clamp(2.2rem, 11vw, 3.8rem); }
+  .home-nav-item:active { transform: scaleX(1.4) scale(1.1); filter: none; }
   .back-bar { padding: 1.25rem 0 0.5rem; }
   .sp-header { padding: 1rem 1.5rem 1.25rem; margin-bottom: 1.25rem; }
   .sp-title { font-size: clamp(1.8rem, 7vw, 3rem); }
