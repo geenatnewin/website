@@ -151,6 +151,10 @@ html, body {
 .home-nav-item:hover {
   filter: invert(1) blur(2px);
 }
+.home-nav-item:active {
+  transform: scaleX(1.4) scale(1.1);
+  filter: blur(0.35px);
+}
 
 /* ── SUBPAGES ── */
 .back-bar {
