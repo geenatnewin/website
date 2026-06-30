@@ -5,17 +5,34 @@ import Link from 'next/link'
 
 export default function Home() {
   const videoRef = useRef(null)
+  const posterRef = useRef(null)
 
   useEffect(() => {
     const video = videoRef.current
+    const poster = posterRef.current
     if (!video) return
     video.muted = true
     video.setAttribute('playsinline', '')
     video.setAttribute('webkit-playsinline', '')
 
-    const tryPlay = () => video.play().catch(() => {})
-    tryPlay()
-    document.addEventListener('touchstart', tryPlay, { once: true })
+    const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+
+    if (!isMobile) {
+      if (poster) poster.style.display = 'none'
+      video.play().catch(() => {})
+      return
+    }
+
+    const onTouch = () => {
+      video.play().catch(() => {})
+      if (poster) {
+        poster.style.opacity = '0'
+        poster.addEventListener('transitionend', () => { poster.style.display = 'none' }, { once: true })
+      }
+    }
+
+    document.addEventListener('touchstart', onTouch, { once: true })
+    return () => document.removeEventListener('touchstart', onTouch)
   }, [])
 
   return (
@@ -24,6 +41,13 @@ export default function Home() {
         <video ref={videoRef} muted loop playsInline preload="auto" autoPlay>
           <source src="https://pub-095a05fb51af4a3b83d5e05b40b59ff4.r2.dev/vcftest.mp4" type="video/mp4" />
         </video>
+        <img
+          ref={posterRef}
+          src="/poster.jpg"
+          alt=""
+          className="video-poster"
+          aria-hidden="true"
+        />
         <div className="video-block-overlay" />
       </div>
       <div className="home-logo">Navin Nguyen</div>
