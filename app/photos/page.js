@@ -152,7 +152,6 @@ export default function Photos() {
           }}
         >
           <div className="lightbox-inner">
-            <button className="lightbox-close" onClick={() => setLightbox(null)}>✕</button>
             {lightbox.index > 0 && (
               <button className="lightbox-prev" onClick={lightboxPrev}>&#8249;</button>
             )}
@@ -160,7 +159,6 @@ export default function Photos() {
               <button className="lightbox-next" onClick={lightboxNext}>&#8250;</button>
             )}
             <img src={lightbox.images[lightbox.index]} alt="" />
-            <div className="lightbox-counter">{lightbox.index + 1} / {lightbox.images.length}</div>
           </div>
         </div>
       )}
