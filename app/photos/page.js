@@ -84,11 +84,10 @@ export default function Photos() {
 
   return (
     <>
-      <Link href="/" className="back-btn visible">
-        <span className="back-arrow">←</span> Back
-      </Link>
-
       <div className="page active">
+        <Link href="/" className="back-btn visible">
+          <span className="back-arrow">←</span> Back
+        </Link>
         <div className="subpage">
           <div className="sp-header">
             <h1 className="sp-title">Photos</h1>
