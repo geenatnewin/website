@@ -52,10 +52,10 @@ export default function Home() {
       </div>
       <div className="home-logo">Navin Nguyen</div>
       <nav className="home-nav">
-        <Link className="home-nav-item nav-large" href="/photos" onContextMenu={e => e.preventDefault()}>Photos</Link>
-        <Link className="home-nav-item nav-large" href="/videos" onContextMenu={e => e.preventDefault()}>Videos</Link>
-        <a className="home-nav-item" href="https://www.instagram.com/ng.navin/" target="_blank" rel="noopener noreferrer" onContextMenu={e => e.preventDefault()}>Instagram</a>
-        <Link className="home-nav-item" href="/contact" onContextMenu={e => e.preventDefault()}>Contact</Link>
+        <Link className="home-nav-item nav-large" href="/photos">Photos</Link>
+        <Link className="home-nav-item nav-large" href="/videos">Videos</Link>
+        <a className="home-nav-item" href="https://www.instagram.com/ng.navin/" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <Link className="home-nav-item" href="/contact">Contact</Link>
       </nav>
     </div>
   )
