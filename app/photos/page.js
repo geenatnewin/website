@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 
 const lifePhotos = [
-  '4I0A1194.jpg','4I0A1203.jpg','4I0A1276.jpg','4I0A1282.jpg',
+  '4I0A1194.jpg','4I0A1276.jpg','4I0A1282.jpg',
   '4I0A1302.jpg','4I0A1409.jpg','4I0A1414.jpg','4I0A1780.jpg',
   '4I0A1810.jpg','4I0A2746.jpg','4I0A2752.jpg','4I0A2762.jpg',
   '4I0A2920.jpg','DSC05265.jpg','DSC05382.jpg','DSC05425.jpg',
