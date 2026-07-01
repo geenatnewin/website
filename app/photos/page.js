@@ -9,7 +9,7 @@ const lifePhotos = [
 ]
 
 const musicPhotos = [
-  '4I0A3050.jpg','4I0A3078.jpg','4I0A3269.jpg',
+  '4I0A3022.jpg','4I0A3050.jpg','4I0A3078.jpg','4I0A3269.jpg','4I0A3282.jpg',
   '4I0A4054.jpg','4I0A4131.jpg','4I0A4187.jpg','4I0A4243.jpg',
   '4I0A4269.jpg','4I0A4270.jpg','4I0A4620.jpg','4I0A4775-2.jpg',
   '4I0A4881.jpg','4I0A5352.jpg','4I0A5356.jpg','4I0A5385.jpg',
@@ -17,7 +17,7 @@ const musicPhotos = [
   '4I0A5596.jpg','4I0A5605.jpg','4I0A5842.jpg',
   '4I0A5870.jpg','4I0A5904.jpg','4I0A5972.jpg','4I0A6048.jpg',
   '4I0A6117.jpg','4I0A6119.jpg','4I0A6124.jpg','DSC06058.jpg',
-  'IMG_3276.jpg','IMG_3288.jpg','IMG_3340.jpg',
+  'IMG_3065.jpg','IMG_3068.jpg','IMG_3276.jpg','IMG_3288.jpg','IMG_3340.jpg',
 ]
 
 function Carousel({ title, folder, files, active, onActivate, onOpenLightbox }) {
@@ -121,7 +121,7 @@ export default function Photos() {
           </div>
           <div id="photos-inner">
             <Carousel
-              title="Event"
+              title="Music"
               folder="MUSIC"
               files={musicPhotos}
               active={activeSection === 'music'}
