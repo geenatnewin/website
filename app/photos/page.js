@@ -10,7 +10,7 @@ const lifePhotos = [
   '4I0A2920.jpg','DSC05265.jpg','DSC05382.jpg',
   '4I0A1409.jpg','4I0A1414.jpg','DSC05425.jpg',
   'DSC05448.jpg','DSC05506.jpg','DSC05766.jpg','DSC05777.jpg',
-  'IMG_0007.jpg','IMG_0095.jpg','IMG_0099.jpg','IMG_0840.jpg',
+  'IMG_0007.jpg','IMG_0095.jpg','IMG_0099.jpg','IMG_0177.jpg','IMG_0840.jpg',
   'IMG_9569.jpg',
 ]
 
