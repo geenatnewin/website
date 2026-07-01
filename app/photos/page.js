@@ -4,8 +4,13 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 
 const lifePhotos = [
-  '4I0A2752.jpg','4I0A2762.jpg','4I0A2920.jpg','DSC05766.jpg',
-  'DSC05777.jpg','IMG_0007.jpg','IMG_0095.jpg','IMG_0099.jpg',
+  '4I0A1194.jpg','4I0A1203.jpg','4I0A1276.jpg','4I0A1282.jpg',
+  '4I0A1302.jpg','4I0A1409.jpg','4I0A1414.jpg','4I0A1780.jpg',
+  '4I0A1810.jpg','4I0A2746.jpg','4I0A2752.jpg','4I0A2762.jpg',
+  '4I0A2920.jpg','DSC05265.jpg','DSC05382.jpg','DSC05425.jpg',
+  'DSC05448.jpg','DSC05506.jpg','DSC05766.jpg','DSC05777.jpg',
+  'IMG_0007.jpg','IMG_0095.jpg','IMG_0099.jpg','IMG_0840.jpg',
+  'IMG_9435.jpg','IMG_9462.jpg','IMG_9569.jpg',
 ]
 
 const musicPhotos = [
