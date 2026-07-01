@@ -90,7 +90,6 @@ export default function Videos() {
           </div>
           <div id="videos-inner">
             <VideoSection title="Music" videos={eventVideos} onPlay={setLightbox} />
-            <VideoSection title="Music" videos={musicVideos} onPlay={setLightbox} />
           </div>
         </div>
       </div>
