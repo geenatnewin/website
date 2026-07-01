@@ -14,10 +14,10 @@ const lifePhotos = [
 ]
 
 const musicPhotos = [
-  '4I0A3022.jpg','4I0A3050.jpg','4I0A3078.jpg','4I0A3269.jpg','4I0A3282.jpg',
+  '4I0A3050.jpg','4I0A3078.jpg','4I0A3269.jpg','4I0A3282.jpg',
   '4I0A4054.jpg','4I0A4131.jpg','4I0A4187.jpg','4I0A4243.jpg',
   '4I0A4269.jpg','4I0A4270.jpg','4I0A4620.jpg','4I0A4775-2.jpg',
-  '4I0A4881.jpg','4I0A5352.jpg','4I0A5356.jpg','4I0A5385.jpg',
+  '4I0A3022.jpg','4I0A4881.jpg','4I0A5352.jpg','4I0A5356.jpg','4I0A5385.jpg',
   '4I0A5412.jpg','4I0A5420.jpg','4I0A5498.jpg','4I0A5538.jpg',
   '4I0A5596.jpg','4I0A5605.jpg','4I0A5842.jpg',
   '4I0A5870.jpg','4I0A5904.jpg','4I0A5972.jpg','4I0A6048.jpg',
