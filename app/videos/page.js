@@ -89,7 +89,7 @@ export default function Videos() {
             <h1 className="sp-title">Videos</h1>
           </div>
           <div id="videos-inner">
-            <VideoSection title="Event" videos={eventVideos} onPlay={setLightbox} />
+            <VideoSection title="Music" videos={eventVideos} onPlay={setLightbox} />
             <VideoSection title="Music" videos={musicVideos} onPlay={setLightbox} />
           </div>
         </div>
