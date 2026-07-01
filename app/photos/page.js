@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 const lifePhotos = [
   '4I0A2752.jpg','4I0A2762.jpg','4I0A2920.jpg','DSC05766.jpg',
-  'DSC05777.jpg','IMG_0007.jpg','IMG_0095.jpg','IMG_0097.jpg','IMG_0099.jpg',
+  'DSC05777.jpg','IMG_0007.jpg','IMG_0095.jpg','IMG_0099.jpg',
 ]
 
 const musicPhotos = [
