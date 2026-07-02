@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import PageFade from '../components/PageFade'
 
 const lifePhotos = [
   '4I0A1194.jpg','4I0A1276.jpg','4I0A1282.jpg',
@@ -55,7 +56,7 @@ function Carousel({ title, folder, files, active, onActivate, onOpenLightbox }) 
 
   return (
     <div className="carousel-section" onClick={onActivate}>
-      <h2 className={`section-title${active ? ' section-title-active' : ''}`}>{title}</h2>
+      <h2 className="section-title">{title}</h2>
       <div className="carousel-wrap">
         <button
           className="carousel-arrow carousel-arrow-left"
@@ -115,7 +116,7 @@ export default function Photos() {
 
   return (
     <>
-      <div className="page active">
+      <PageFade>
         <div className="back-bar">
           <Link href="/" className="back-btn visible">
             <span className="back-arrow">←</span> Back
@@ -144,7 +145,7 @@ export default function Photos() {
             />
           </div>
         </div>
-      </div>
+      </PageFade>
 
       {lightbox && (
         <div

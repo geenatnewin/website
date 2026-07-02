@@ -82,7 +82,7 @@ All 7 event videos are live including PALACIO II, AKILLA, AKILLA II (deployed 20
 
 - [x] Deploy pending videos (PALACIO II, AKILLA, AKILLA II) — done 2026-06-30
 - [ ] Add real music videos to Music section on Videos page
-- [ ] Optional: custom domain (~$10/yr via Namecheap)
+- [ ] Custom domain — user buying via Cloudflare Registrar (cheapest, already has account)
 
 ## Session Log
 
@@ -105,6 +105,19 @@ All 7 event videos are live including PALACIO II, AKILLA, AKILLA II (deployed 20
 
 ### Session 5 — 2026-06-30
 - Quota reset, deployed PALACIO II, AKILLA, AKILLA II — all 7 event videos now live
+
+### Session 7 — 2026-06-30
+- Removed pool photo (IMG_0097.jpg) from Life carousel
+- Added 4 new photos to Music carousel (4I0A3022, 4I0A3282, IMG_3065, IMG_3068)
+- Renamed "Event" → "Music" on both Photos and Videos pages
+- Added 19 photos to Life carousel from Desktop\port folder
+- Removed empty second Music section from Videos page
+- Reordered Life carousel multiple times per user request
+- Removed IMG_9435, IMG_9462 from Life; added IMG_0177 (exported from DNG)
+- Fixed alias downtime issue: removed alias from vercel.json, now manually set after each deploy
+- Created deploy.ps1 script to auto-set alias after future deploys
+- Started localhost:3000 dev server for faster previewing
+- **Vercel alias issue:** navinnguyen.vercel.app must be manually re-pointed after each deploy via `vercel alias set [url] navinnguyen.vercel.app`
 
 ### Session 6 — 2026-06-30
 - Fixed mobile nav font size overflow in portrait (INSTAGRAM no longer cut off)

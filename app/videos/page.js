@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import PageFade from '../components/PageFade'
 
 const R2 = 'https://pub-095a05fb51af4a3b83d5e05b40b59ff4.r2.dev'
 
@@ -57,7 +58,11 @@ function VideoSection({ title, videos, onPlay }) {
       <h2 className="section-title">{title}</h2>
       <div className="video-grid">
         {videos.map((v, i) => (
-          <div key={i} className="video-card" onClick={() => onPlay(v.src)}>
+          <div
+            key={i}
+            className="video-card"
+            onClick={() => onPlay(v.src)}
+          >
             <div className="video-card-thumb">
               <VideoThumb src={v.src} />
               <div className="play-icon"><PlayIcon /></div>
@@ -78,7 +83,7 @@ export default function Videos() {
 
   return (
     <>
-      <div className="page active">
+      <PageFade>
         <div className="back-bar">
           <Link href="/" className="back-btn visible">
             <span className="back-arrow">←</span> Back
@@ -92,13 +97,13 @@ export default function Videos() {
             <VideoSection title="Music" videos={eventVideos} onPlay={setLightbox} />
           </div>
         </div>
-      </div>
+      </PageFade>
 
       {lightbox && (
         <div
           style={{
             position: 'fixed', inset: 0, zIndex: 2000,
-            background: 'rgba(0,0,0,0.96)',
+            background: '#000',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: '2rem',
           }}

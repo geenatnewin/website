@@ -202,28 +202,26 @@ html, body {
 }
 .sp-title {
   font-family: var(--kabisat);
-  font-size: clamp(3rem, 8vw, 7rem);
+  font-size: clamp(3.4rem, 9vw, 8rem);
   font-weight: 900;
   text-transform: uppercase;
   line-height: 0.9;
   color: var(--white);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
 }
 
 /* ── PHOTOS ── */
 .carousel-section { width: 100%; margin-bottom: 5rem; }
 .section-title {
   font-family: var(--condensed);
-  font-size: clamp(1.4rem, 3vw, 2.4rem);
+  font-size: clamp(1.6rem, 3.5vw, 2.8rem);
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.11em;
   color: var(--white);
-  opacity: 0.3;
+  opacity: 0.8;
   margin-bottom: 1.25rem;
-  transition: opacity 0.2s;
 }
-.section-title-active { opacity: 0.8; }
 .carousel-wrap {
   position: relative;
   display: flex;
@@ -255,7 +253,9 @@ html, body {
   display: block;
   object-fit: cover;
   pointer-events: none;
+  transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
 }
+.carousel-item:hover img { transform: scale(1.06); }
 .carousel-arrow {
   background: none;
   border: none;
@@ -327,7 +327,11 @@ html, body {
 /* ── VIDEOS ── */
 .video-section { width: 100%; margin-bottom: 4rem; }
 .section-empty { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.2); margin-top: 0.5rem; }
-.video-card-thumb video { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+.video-card-thumb video {
+  width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0;
+  transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+.video-card:hover .video-card-thumb video { transform: scale(1.08); }
 
 #videos-inner {
   padding: 0 3rem 4rem;
@@ -354,8 +358,8 @@ html, body {
   position: relative;
   overflow: hidden;
 }
-.video-card-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
-.video-card:hover .video-card-thumb img { transform: scale(1.04); }
+.video-card-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); }
+.video-card:hover .video-card-thumb img { transform: scale(1.08); }
 .video-card-thumb .play-icon {
   position: absolute;
   width: 48px; height: 48px;
@@ -420,7 +424,7 @@ html, body {
 /* LIGHTBOX */
 .lightbox {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.96);
+  background: #000;
   z-index: 1000; display: none;
   align-items: center; justify-content: center; padding: 2rem;
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
+import PageFade from './components/PageFade'
 
 export default function Home() {
   const videoRef = useRef(null)
@@ -36,7 +37,7 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="page active" id="home">
+    <PageFade id="home">
       <div className="bg-media">
         <video ref={videoRef} muted loop playsInline preload="auto" autoPlay>
           <source src="https://pub-095a05fb51af4a3b83d5e05b40b59ff4.r2.dev/vcftest.mp4" type="video/mp4" />
@@ -57,6 +58,6 @@ export default function Home() {
         <a className="home-nav-item" href="https://www.instagram.com/ng.navin/" target="_blank" rel="noopener noreferrer">Instagram</a>
         <Link className="home-nav-item" href="/contact">Contact</Link>
       </nav>
-    </div>
+    </PageFade>
   )
 }

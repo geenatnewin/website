@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import PageFade from '../components/PageFade'
 
 export default function Contact() {
   const [submitState, setSubmitState] = useState('idle')
@@ -29,7 +30,7 @@ export default function Contact() {
 
   return (
     <>
-      <div className="page active">
+      <PageFade>
         <div className="back-bar">
           <Link href="/" className="back-btn visible">
             <span className="back-arrow">←</span> Back
@@ -77,7 +78,7 @@ export default function Contact() {
             </form>
           </div>
         </div>
-      </div>
+      </PageFade>
     </>
   )
 }
