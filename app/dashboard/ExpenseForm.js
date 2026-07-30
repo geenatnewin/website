@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { EXPENSE_CATEGORIES, categoryConfig } from './categories'
+import ReceiptLightbox from './ReceiptLightbox'
 
 function toDateInput(value) {
   if (!value) return ''
@@ -50,6 +51,10 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
   const [receiptPreview, setReceiptPreview] = useState(null)
   const [analyzing, setAnalyzing] = useState(false)
   const [analyzeError, setAnalyzeError] = useState('')
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  // receiptPreview is a fresh local blob (this session's upload); once saved, fall
+  // back to the signed-URL endpoint so a previously-attached receipt is viewable too.
+  const receiptViewSrc = receiptPreview || (receiptKey ? `/api/ledger/receipt?key=${encodeURIComponent(receiptKey)}` : null)
 
   async function handleReceiptChange(e) {
     const file = e.target.files?.[0]
@@ -146,18 +151,26 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
             accept="image/*"
             onChange={handleReceiptChange}
           />
-          {receiptPreview && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={receiptPreview} alt="Receipt preview" className="ldg-receipt-preview" />
+          {receiptViewSrc && (
+            <button
+              type="button"
+              className="ldg-receipt-preview-btn"
+              onClick={() => setLightboxOpen(true)}
+              aria-label="View full-size receipt"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={receiptViewSrc} alt="Receipt preview" className="ldg-receipt-preview" />
+            </button>
           )}
           {analyzing && <p className="ldg-hint">Reading receipt…</p>}
           {analyzeError && <p className="ldg-hint ldg-hint-error">{analyzeError}</p>}
           {receiptKey && !analyzing && (
-            <p className="ldg-hint">✓ Receipt attached — double-check the fields below before submitting.</p>
+            <p className="ldg-hint">✓ Receipt attached — tap the photo to view it full-size. Double-check the fields below before submitting.</p>
           )}
           <input type="hidden" name="receiptKey" value={receiptKey} readOnly />
         </div>
       )}
+      <ReceiptLightbox src={lightboxOpen ? receiptViewSrc : null} onClose={() => setLightboxOpen(false)} />
 
       {isMealsBulk ? (
         <div className="ldg-field">
