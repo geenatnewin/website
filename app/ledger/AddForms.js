@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { GIG_TYPES, EXPENSE_CATEGORIES } from './categories'
+import { GIG_TYPES, EXPENSE_CATEGORIES, PAYMENT_METHODS } from './categories'
 
 export default function AddForms({ addGig, addExpense, recentGigs }) {
   const [openForm, setOpenForm] = useState(null) // null | 'gig' | 'expense'
   const [gigType, setGigType] = useState('photography')
+  const [paymentMethod, setPaymentMethod] = useState('Venmo')
+  const isPaymentOther = paymentMethod === 'Other'
 
   function toggle(name) {
     setOpenForm((current) => (current === name ? null : name))
@@ -67,8 +69,25 @@ export default function AddForms({ addGig, addExpense, recentGigs }) {
 
           <div className="ldg-field">
             <label htmlFor="paymentMethod">Payment method</label>
-            <input type="text" id="paymentMethod" name="paymentMethod" placeholder="Venmo, Zelle, check…" />
+            <select
+              id="paymentMethod"
+              name={isPaymentOther ? undefined : 'paymentMethod'}
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            >
+              {PAYMENT_METHODS.map((m) => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+              <option value="Other">Other</option>
+            </select>
           </div>
+
+          {isPaymentOther && (
+            <div className="ldg-field">
+              <label htmlFor="paymentMethodOther">Specify payment method</label>
+              <input type="text" id="paymentMethodOther" name="paymentMethod" placeholder="e.g. wire transfer" />
+            </div>
+          )}
 
           <div className="ldg-field">
             <label htmlFor="datePaid">Date paid</label>

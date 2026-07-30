@@ -1,3 +1,13 @@
+export const PAYMENT_METHODS = [
+  'Venmo',
+  'Zelle',
+  'Cash App',
+  'PayPal',
+  'Direct Deposit',
+  'Check',
+  'Cash',
+]
+
 export const GIG_TYPES = [
   { value: 'photography', label: 'Photography' },
   { value: 'videography', label: 'Videography' },
