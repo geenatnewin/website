@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { categoryLabel, metaSummary } from './categories'
-import { formatMoney } from './format'
+import { formatMoney, isPdfKey } from './format'
 import ExpenseForm from './ExpenseForm'
 import ConfirmModal from './ConfirmModal'
 import ReceiptLightbox from './ReceiptLightbox'
@@ -91,14 +91,26 @@ export default function ExpenseLine({ expense, showDate, editExpense, removeExpe
           {receiptKeys.length > 0 && (
             <div className="ldg-expense-receipts">
               {receiptKeys.map((key, i) => (
-                <button
-                  key={key}
-                  type="button"
-                  className="ldg-icon-btn ldg-expense-details-receipt"
-                  onClick={() => setLightboxIndex(i)}
-                >
-                  {receiptKeys.length > 1 ? `View receipt ${i + 1}` : 'View receipt'}
-                </button>
+                isPdfKey(key) ? (
+                  <a
+                    key={key}
+                    href={`/api/ledger/receipt?key=${encodeURIComponent(key)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ldg-icon-btn ldg-expense-details-receipt"
+                  >
+                    {receiptKeys.length > 1 ? `View receipt ${i + 1} (PDF)` : 'View receipt (PDF)'}
+                  </a>
+                ) : (
+                  <button
+                    key={key}
+                    type="button"
+                    className="ldg-icon-btn ldg-expense-details-receipt"
+                    onClick={() => setLightboxIndex(i)}
+                  >
+                    {receiptKeys.length > 1 ? `View receipt ${i + 1}` : 'View receipt'}
+                  </button>
+                )
               ))}
             </div>
           )}

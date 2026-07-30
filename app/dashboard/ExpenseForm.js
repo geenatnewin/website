@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { EXPENSE_CATEGORIES, categoryConfig } from './categories'
+import { isPdfKey } from './format'
 import ReceiptLightbox from './ReceiptLightbox'
 
 function toDateInput(value) {
@@ -194,11 +195,11 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
 
       {showReceiptUpload && (
         <div className="ldg-field">
-          <label htmlFor="receiptPhoto">Receipt Photo (optional, one or more)</label>
+          <label htmlFor="receiptPhoto">Receipt Photo or PDF (optional, one or more)</label>
           <input
             type="file"
             id="receiptPhoto"
-            accept="image/*"
+            accept="image/*,application/pdf"
             multiple
             onChange={handleFilesSelected}
           />
@@ -208,8 +209,12 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
               <div className="ldg-receipt-pending">
                 {pendingFiles.map((f) => (
                   <div key={f.id} className="ldg-receipt-pending-item">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={f.previewUrl} alt={f.file.name} className="ldg-receipt-preview ldg-receipt-preview-sm" />
+                    {f.file.type === 'application/pdf' ? (
+                      <div className="ldg-receipt-pdf-chip" title={f.file.name}>PDF</div>
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={f.previewUrl} alt={f.file.name} className="ldg-receipt-preview ldg-receipt-preview-sm" />
+                    )}
                     <button type="button" className="ldg-icon-btn ldg-icon-btn-danger" onClick={() => removePendingFile(f.id)}>
                       Remove
                     </button>
@@ -217,9 +222,9 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
                 ))}
               </div>
               <button type="button" className="ldg-btn ldg-btn-calc" onClick={scanReceipts} disabled={analyzing}>
-                {analyzing ? 'Scanning…' : `Scan ${pendingFiles.length} photo${pendingFiles.length === 1 ? '' : 's'}`}
+                {analyzing ? 'Scanning…' : `Scan ${pendingFiles.length} file${pendingFiles.length === 1 ? '' : 's'}`}
               </button>
-              <p className="ldg-hint">Remove anything that shouldn't be here first — scanning is what actually reads the photo(s) and costs an API call.</p>
+              <p className="ldg-hint">Remove anything that shouldn't be here first — scanning is what actually reads the file(s) and costs an API call.</p>
             </>
           )}
 
@@ -229,20 +234,32 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
             <>
               <div className="ldg-receipt-pending">
                 {receiptKeys.map((key, i) => (
-                  <button
-                    key={key}
-                    type="button"
-                    className="ldg-receipt-preview-btn"
-                    onClick={() => setLightboxIndex(i)}
-                    aria-label={`View receipt photo ${i + 1} full-size`}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={`/api/ledger/receipt?key=${encodeURIComponent(key)}`} alt={`Receipt ${i + 1}`} className="ldg-receipt-preview ldg-receipt-preview-sm" />
-                  </button>
+                  isPdfKey(key) ? (
+                    <a
+                      key={key}
+                      href={`/api/ledger/receipt?key=${encodeURIComponent(key)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ldg-receipt-pdf-chip"
+                    >
+                      PDF
+                    </a>
+                  ) : (
+                    <button
+                      key={key}
+                      type="button"
+                      className="ldg-receipt-preview-btn"
+                      onClick={() => setLightboxIndex(i)}
+                      aria-label={`View receipt photo ${i + 1} full-size`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={`/api/ledger/receipt?key=${encodeURIComponent(key)}`} alt={`Receipt ${i + 1}`} className="ldg-receipt-preview ldg-receipt-preview-sm" />
+                    </button>
+                  )
                 ))}
               </div>
               <p className="ldg-hint">
-                ✓ {receiptKeys.length} receipt photo{receiptKeys.length === 1 ? '' : 's'} attached — tap to view full-size. Double-check the fields below before submitting.
+                ✓ {receiptKeys.length} receipt file{receiptKeys.length === 1 ? '' : 's'} attached — tap to view. Double-check the fields below before submitting.
               </p>
             </>
           )}

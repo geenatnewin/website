@@ -325,6 +325,22 @@
 .ldg-receipt-preview-btn:focus-visible { outline: 2px solid #2f7cf6; outline-offset: 2px; }
 
 .ldg-receipt-preview-sm { max-width: 72px; max-height: 72px; }
+.ldg-receipt-pdf-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card-alt);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  text-align: center;
+}
 .ldg-receipt-pending {
   display: flex;
   flex-wrap: wrap;

@@ -28,7 +28,8 @@ const RECEIPT_SCHEMA = {
   additionalProperties: false,
 }
 
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic']
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic']
+const ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, 'application/pdf']
 const MAX_BYTES = 10 * 1024 * 1024
 const MAX_FILES = 6
 
@@ -53,17 +54,17 @@ export async function POST(request) {
   const files = formData.getAll('receipt').filter((f) => f && typeof f !== 'string')
 
   if (files.length === 0) {
-    return NextResponse.json({ error: 'No receipt image provided' }, { status: 400 })
+    return NextResponse.json({ error: 'No receipt file provided' }, { status: 400 })
   }
   if (files.length > MAX_FILES) {
-    return NextResponse.json({ error: `Too many photos at once (max ${MAX_FILES})` }, { status: 400 })
+    return NextResponse.json({ error: `Too many files at once (max ${MAX_FILES})` }, { status: 400 })
   }
   for (const file of files) {
     if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json({ error: 'Unsupported image type' }, { status: 400 })
+      return NextResponse.json({ error: 'Unsupported file type — photos (JPEG/PNG/WEBP/HEIC) or PDF only' }, { status: 400 })
     }
     if (file.size > MAX_BYTES) {
-      return NextResponse.json({ error: 'One of the photos is too large (max 10MB each)' }, { status: 400 })
+      return NextResponse.json({ error: 'One of the files is too large (max 10MB each)' }, { status: 400 })
     }
   }
 
@@ -82,8 +83,11 @@ export async function POST(request) {
   const receiptKeys = uploaded.map((u) => u.receiptKey).filter(Boolean)
 
   try {
-    const imageBlocks = uploaded.map((u) => ({
-      type: 'image',
+    // A PDF (e.g. an emailed invoice, or a scanning app's PDF export) uses a
+    // "document" content block instead of "image" — everything else about the
+    // request is identical, Claude reads either the same way.
+    const fileBlocks = uploaded.map((u) => ({
+      type: u.type === 'application/pdf' ? 'document' : 'image',
       source: { type: 'base64', media_type: u.type, data: u.bytes.toString('base64') },
     }))
     const response = await client.messages.create({
@@ -94,10 +98,10 @@ export async function POST(request) {
         {
           role: 'user',
           content: [
-            ...imageBlocks,
+            ...fileBlocks,
             {
               type: 'text',
-              text: "These are one or more photos of a single receipt for a freelance photographer/videographer's tax records (e.g. a long receipt photographed in multiple parts, or just one photo — treat all images together as one receipt, don't double-count anything visible in more than one photo). Extract the vendor name, purchase date, and every individual line item with its own price — list every item that appears; do not skip, merge, or summarize multiple items into one. For each item's description, write a short summarized name (a few words — e.g. \"NiSi Magnetic Filter Kit\", not the full verbose product title with every spec in parentheses). Separately: if sales tax is broken out as its own line, put that amount in the \"tax\" field (0 if there's no separate tax line). If there's a separate shipping/delivery charge, put that in the \"shipping\" field (0 if none). Do not include tax, shipping, the subtotal, or the grand total as one of the items — items should only be the actual products/services purchased. If the receipt only shows one total with no itemized breakdown, return a single item using the total amount and a short description of what was purchased, with tax and shipping left as 0. Leave vendor or date as an empty string if illegible.",
+              text: "These are one or more photos or PDFs of a single receipt for a freelance photographer/videographer's tax records (e.g. a long receipt photographed in multiple parts, a multi-page PDF invoice, or just one file — treat everything together as one receipt, don't double-count anything visible in more than one file). Extract the vendor name, purchase date, and every individual line item with its own price — list every item that appears; do not skip, merge, or summarize multiple items into one. For each item's description, write a short summarized name (a few words — e.g. \"NiSi Magnetic Filter Kit\", not the full verbose product title with every spec in parentheses). Separately: if sales tax is broken out as its own line, put that amount in the \"tax\" field (0 if there's no separate tax line). If there's a separate shipping/delivery charge, put that in the \"shipping\" field (0 if none). Do not include tax, shipping, the subtotal, or the grand total as one of the items — items should only be the actual products/services purchased. If the receipt only shows one total with no itemized breakdown, return a single item using the total amount and a short description of what was purchased, with tax and shipping left as 0. Leave vendor or date as an empty string if illegible.",
             },
           ],
         },
