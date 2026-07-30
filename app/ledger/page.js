@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { getGigs, getExpenses, getRecentGigsForDropdown } from './db'
 import { addGig, addExpense, logout } from './actions'
-import { categoryLabel } from './categories'
+import { categoryLabel, metaSummary } from './categories'
 import { mileageDeduction } from './mileage'
 import AddForms from './AddForms'
 import RevealAmount from './RevealAmount'
@@ -83,10 +83,15 @@ export default async function LedgerDashboard() {
             )}
             {g.notes && <div className="ldg-entry-sub">{g.notes}</div>}
             {(expensesByGig[g.id] || []).map((e) => (
-              <div className="ldg-expense-row" key={e.id}>
-                <span>{categoryLabel(e.category)}</span>
-                <span>{e.vendor || '—'}</span>
-                <span>${Number(e.amount).toFixed(2)}</span>
+              <div key={e.id}>
+                <div className="ldg-expense-row">
+                  <span>{categoryLabel(e.category)}</span>
+                  <span>{e.vendor || '—'}</span>
+                  <span>${Number(e.amount).toFixed(2)}</span>
+                </div>
+                {metaSummary(e.category, e.meta) && (
+                  <div className="ldg-expense-meta">{metaSummary(e.category, e.meta)}</div>
+                )}
               </div>
             ))}
           </div>
@@ -97,11 +102,16 @@ export default async function LedgerDashboard() {
         <section className="ldg-card ldg-list">
           <p className="ldg-card-title">General expenses</p>
           {generalExpenses.map((e) => (
-            <div className="ldg-expense-row" key={e.id}>
-              <span>{new Date(e.expense_date).toLocaleDateString()}</span>
-              <span>{categoryLabel(e.category)}</span>
-              <span>{e.vendor || '—'}</span>
-              <span>${Number(e.amount).toFixed(2)}</span>
+            <div key={e.id}>
+              <div className="ldg-expense-row">
+                <span>{new Date(e.expense_date).toLocaleDateString()}</span>
+                <span>{categoryLabel(e.category)}</span>
+                <span>{e.vendor || '—'}</span>
+                <span>${Number(e.amount).toFixed(2)}</span>
+              </div>
+              {metaSummary(e.category, e.meta) && (
+                <div className="ldg-expense-meta">{metaSummary(e.category, e.meta)}</div>
+              )}
             </div>
           ))}
         </section>

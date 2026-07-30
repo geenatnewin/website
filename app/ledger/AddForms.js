@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { GIG_TYPES, EXPENSE_CATEGORIES, PAYMENT_METHODS } from './categories'
+import { GIG_TYPES, EXPENSE_CATEGORIES, PAYMENT_METHODS, categoryConfig } from './categories'
 
 export default function AddForms({ addGig, addExpense, recentGigs }) {
   const [openForm, setOpenForm] = useState(null) // null | 'gig' | 'expense'
   const [gigType, setGigType] = useState('photography')
+  const [expenseCategory, setExpenseCategory] = useState('supplies')
+  const expenseCategoryConfig = categoryConfig(expenseCategory)
   const [paymentMethod, setPaymentMethod] = useState('Venmo')
   const isPaymentOther = paymentMethod === 'Other'
   const [venueAddress, setVenueAddress] = useState('')
@@ -179,11 +181,17 @@ export default function AddForms({ addGig, addExpense, recentGigs }) {
 
           <div className="ldg-field">
             <label htmlFor="category">Category</label>
-            <select id="category" name="category" defaultValue="supplies">
+            <select
+              id="category"
+              name="category"
+              value={expenseCategory}
+              onChange={(e) => setExpenseCategory(e.target.value)}
+            >
               {EXPENSE_CATEGORIES.map((c) => (
                 <option key={c.value} value={c.value}>{c.label}</option>
               ))}
             </select>
+            {expenseCategoryConfig?.hint && <p className="ldg-hint">{expenseCategoryConfig.hint}</p>}
           </div>
 
           <div className="ldg-field">
@@ -204,9 +212,24 @@ export default function AddForms({ addGig, addExpense, recentGigs }) {
           </div>
 
           <div className="ldg-field">
-            <label htmlFor="vendor">Vendor</label>
+            <label htmlFor="vendor">{expenseCategoryConfig?.vendorLabel || 'Vendor'}</label>
             <input type="text" id="vendor" name="vendor" />
           </div>
+
+          {expenseCategoryConfig?.extraField && (
+            <div className="ldg-field" key={expenseCategoryConfig.extraField.name}>
+              <label htmlFor={expenseCategoryConfig.extraField.name}>{expenseCategoryConfig.extraField.label}</label>
+              <input
+                type={expenseCategoryConfig.extraField.type || 'text'}
+                id={expenseCategoryConfig.extraField.name}
+                name={expenseCategoryConfig.extraField.name}
+                placeholder={expenseCategoryConfig.extraField.placeholder}
+                defaultValue={expenseCategoryConfig.extraField.defaultValue}
+                required={expenseCategoryConfig.extraField.required}
+                {...(expenseCategoryConfig.extraField.type === 'number' ? { min: 0, max: 100, step: 1 } : {})}
+              />
+            </div>
+          )}
 
           <div className="ldg-field">
             <label htmlFor="description">Description</label>

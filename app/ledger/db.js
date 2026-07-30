@@ -32,9 +32,9 @@ export async function insertGig({
   `
 }
 
-export async function insertExpense({ gigId, expenseDate, category, description, amount, vendor }) {
+export async function insertExpense({ gigId, expenseDate, category, description, amount, vendor, meta }) {
   await sql`
-    INSERT INTO expenses (gig_id, expense_date, category, description, amount, vendor)
-    VALUES (${gigId || null}, ${expenseDate}, ${category}, ${description || null}, ${amount}, ${vendor || null})
+    INSERT INTO expenses (gig_id, expense_date, category, description, amount, vendor, meta)
+    VALUES (${gigId || null}, ${expenseDate}, ${category}, ${description || null}, ${amount}, ${vendor || null}, ${JSON.stringify(meta || {})}::jsonb)
   `
 }

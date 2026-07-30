@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { getGigs, getExpenses } from '../db'
 import { logout } from '../actions'
 import { mileageDeduction } from '../mileage'
-import { EXPENSE_CATEGORIES, MILEAGE_CHART_COLOR } from '../categories'
+import { EXPENSE_CATEGORIES, MILEAGE_CHART_COLOR, deductibleAmount } from '../categories'
 import LedgerShell from '../LedgerShell'
 import PrintButton from './PrintButton'
 import CategoryDonut from './CategoryDonut'
@@ -23,8 +23,16 @@ export default async function LedgerReport() {
   const mileageDeductionTotal = gigs.reduce((s, g) => s + mileageDeduction(g.gig_date, g.mileage), 0)
 
   const byCategory = {}
-  for (const c of EXPENSE_CATEGORIES) byCategory[c.value] = 0
-  for (const e of expenses) byCategory[e.category] = (byCategory[e.category] || 0) + Number(e.amount)
+  const byCategoryRaw = {}
+  for (const c of EXPENSE_CATEGORIES) {
+    byCategory[c.value] = 0
+    byCategoryRaw[c.value] = 0
+  }
+  for (const e of expenses) {
+    const raw = Number(e.amount)
+    byCategory[e.category] = (byCategory[e.category] || 0) + deductibleAmount(e.category, raw, e.meta)
+    byCategoryRaw[e.category] = (byCategoryRaw[e.category] || 0) + raw
+  }
 
   const categoryExpenseTotal = Object.values(byCategory).reduce((a, b) => a + b, 0)
   const totalExpenses = categoryExpenseTotal + mileageDeductionTotal
@@ -54,7 +62,7 @@ export default async function LedgerReport() {
   }
   for (const e of expenses) {
     const qi = quarterIndex(e.expense_date)
-    quarters[qi].expenses += Number(e.amount)
+    quarters[qi].expenses += deductibleAmount(e.category, e.amount, e.meta)
   }
 
   const byClient = {}
@@ -96,7 +104,12 @@ export default async function LedgerReport() {
               <span className="ldg-legend-dot" style={{ background: `var(--chart-${c.chartColor})` }} />
               {c.label} <span className="ldg-report-sub">{c.scheduleC}</span>
             </span>
-            <span>${byCategory[c.value].toFixed(2)}</span>
+            <span>
+              ${byCategory[c.value].toFixed(2)}
+              {Math.abs(byCategoryRaw[c.value] - byCategory[c.value]) > 0.004 && (
+                <span className="ldg-report-sub"> (of ${byCategoryRaw[c.value].toFixed(2)} spent)</span>
+              )}
+            </span>
           </div>
         ))}
         <div className="ldg-report-row">

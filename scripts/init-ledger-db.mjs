@@ -42,6 +42,7 @@ await sql`
     description TEXT,
     amount NUMERIC(10,2) NOT NULL,
     vendor TEXT,
+    meta JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
   )
 `

@@ -1,5 +1,5 @@
 import { getGigs, getExpenses } from '../../../ledger/db'
-import { categoryLabel } from '../../../ledger/categories'
+import { categoryLabel, deductibleAmount, metaSummary } from '../../../ledger/categories'
 import { mileageDeduction } from '../../../ledger/mileage'
 
 export const dynamic = 'force-dynamic'
@@ -18,7 +18,7 @@ export async function GET() {
   const [gigs, expenses] = await Promise.all([getGigs(), getExpenses()])
 
   const rows = [
-    ['Type', 'Date', 'Client/Vendor', 'Category/GigType', 'Amount', 'MileageDeduction', 'PaymentMethod/Status', 'Notes'].join(','),
+    ['Type', 'Date', 'Client/Vendor', 'Category/GigType', 'Amount', 'DeductibleAmount', 'MileageDeduction', 'PaymentMethod/Status', 'Details', 'Notes'].join(','),
   ]
 
   for (const g of gigs) {
@@ -27,10 +27,12 @@ export async function GET() {
         'Gig income',
         isoDate(g.gig_date),
         csvEscape(g.client),
-        g.gig_type,
+        g.gig_type === 'other' && g.gig_type_other ? g.gig_type_other : g.gig_type,
         Number(g.gross_payment).toFixed(2),
+        '',
         mileageDeduction(g.gig_date, g.mileage).toFixed(2),
         csvEscape(`${g.payment_method || ''} / ${g.status}`),
+        '',
         csvEscape(g.notes || ''),
       ].join(',')
     )
@@ -44,8 +46,10 @@ export async function GET() {
         csvEscape(e.vendor || ''),
         categoryLabel(e.category),
         Number(e.amount).toFixed(2),
+        deductibleAmount(e.category, e.amount, e.meta).toFixed(2),
         '',
         '',
+        csvEscape(metaSummary(e.category, e.meta)),
         csvEscape(e.description || ''),
       ].join(',')
     )

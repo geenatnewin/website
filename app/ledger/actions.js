@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { insertGig, insertExpense } from './db'
 import { computeSessionToken, LEDGER_COOKIE } from './token'
+import { categoryConfig } from './categories'
 
 export async function login(formData) {
   const password = formData.get('password')
@@ -46,13 +47,23 @@ export async function addGig(formData) {
 
 export async function addExpense(formData) {
   const gigIdRaw = formData.get('gigId')
+  const category = formData.get('category')
+  const config = categoryConfig(category)
+
+  const meta = {}
+  if (config?.extraField) {
+    const value = formData.get(config.extraField.name)
+    if (value) meta[config.extraField.name] = value
+  }
+
   await insertExpense({
     gigId: gigIdRaw ? Number(gigIdRaw) : null,
     expenseDate: formData.get('expenseDate'),
-    category: formData.get('category'),
+    category,
     description: formData.get('description'),
     amount: formData.get('amount'),
     vendor: formData.get('vendor'),
+    meta,
   })
   revalidatePath('/ledger')
   revalidatePath('/ledger/report')
