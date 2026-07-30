@@ -4,7 +4,7 @@ import { logout } from '../actions'
 import { getLockoutLog } from '../security'
 import LedgerShell from '../LedgerShell'
 
-export const metadata = { title: 'Ledger — Security' }
+export const metadata = { title: 'Dashboard — Security' }
 
 export default async function SecurityPage() {
   const lockouts = await getLockoutLog()

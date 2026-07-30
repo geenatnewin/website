@@ -30,6 +30,7 @@ const RECEIPT_SCHEMA = {
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic']
 const MAX_BYTES = 10 * 1024 * 1024
+const MAX_FILES = 6
 
 // Splits tax/shipping across items by each item's share of the subtotal, in integer
 // cents so the allocated amounts always sum exactly back to itemsTotal + extraCents
@@ -49,42 +50,54 @@ function allocateExtraCharges(items, extraCents) {
 
 export async function POST(request) {
   const formData = await request.formData()
-  const file = formData.get('receipt')
+  const files = formData.getAll('receipt').filter((f) => f && typeof f !== 'string')
 
-  if (!file || typeof file === 'string') {
+  if (files.length === 0) {
     return NextResponse.json({ error: 'No receipt image provided' }, { status: 400 })
   }
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    return NextResponse.json({ error: 'Unsupported image type' }, { status: 400 })
+  if (files.length > MAX_FILES) {
+    return NextResponse.json({ error: `Too many photos at once (max ${MAX_FILES})` }, { status: 400 })
   }
-  if (file.size > MAX_BYTES) {
-    return NextResponse.json({ error: 'Image is too large (max 10MB)' }, { status: 400 })
+  for (const file of files) {
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json({ error: 'Unsupported image type' }, { status: 400 })
+    }
+    if (file.size > MAX_BYTES) {
+      return NextResponse.json({ error: 'One of the photos is too large (max 10MB each)' }, { status: 400 })
+    }
   }
 
-  const bytes = Buffer.from(await file.arrayBuffer())
+  const uploaded = []
+  for (const file of files) {
+    const bytes = Buffer.from(await file.arrayBuffer())
+    let receiptKey = null
+    try {
+      receiptKey = await uploadReceipt(bytes, file.type)
+    } catch (err) {
+      console.error('Receipt upload to R2 failed', err)
+      // Keep going — the photo just won't be saved, but analysis can still fill the form.
+    }
+    uploaded.push({ bytes, type: file.type, receiptKey })
+  }
+  const receiptKeys = uploaded.map((u) => u.receiptKey).filter(Boolean)
 
-  let receiptKey = null
   try {
-    receiptKey = await uploadReceipt(bytes, file.type)
-  } catch (err) {
-    console.error('Receipt upload to R2 failed', err)
-    // Keep going — the photo just won't be saved, but analysis can still fill the form.
-  }
-
-  try {
-    const base64 = bytes.toString('base64')
+    const imageBlocks = uploaded.map((u) => ({
+      type: 'image',
+      source: { type: 'base64', media_type: u.type, data: u.bytes.toString('base64') },
+    }))
     const response = await client.messages.create({
       model: 'claude-sonnet-5',
-      max_tokens: 1024,
+      max_tokens: 1536,
       output_config: { format: { type: 'json_schema', schema: RECEIPT_SCHEMA } },
       messages: [
         {
           role: 'user',
           content: [
-            { type: 'image', source: { type: 'base64', media_type: file.type, data: base64 } },
+            ...imageBlocks,
             {
               type: 'text',
-              text: "This is a photo of a receipt for a freelance photographer/videographer's tax records. Extract the vendor name, purchase date, and every individual line item with its own price — list every item that appears on the receipt; do not skip, merge, or summarize multiple items into one. For each item's description, write a short summarized name (a few words — e.g. \"NiSi Magnetic Filter Kit\", not the full verbose product title with every spec in parentheses). Separately: if sales tax is broken out as its own line, put that amount in the \"tax\" field (0 if there's no separate tax line). If there's a separate shipping/delivery charge, put that in the \"shipping\" field (0 if none). Do not include tax, shipping, the subtotal, or the grand total as one of the items — items should only be the actual products/services purchased. If the receipt only shows one total with no itemized breakdown, return a single item using the total amount and a short description of what was purchased, with tax and shipping left as 0. Leave vendor or date as an empty string if illegible.",
+              text: "These are one or more photos of a single receipt for a freelance photographer/videographer's tax records (e.g. a long receipt photographed in multiple parts, or just one photo — treat all images together as one receipt, don't double-count anything visible in more than one photo). Extract the vendor name, purchase date, and every individual line item with its own price — list every item that appears; do not skip, merge, or summarize multiple items into one. For each item's description, write a short summarized name (a few words — e.g. \"NiSi Magnetic Filter Kit\", not the full verbose product title with every spec in parentheses). Separately: if sales tax is broken out as its own line, put that amount in the \"tax\" field (0 if there's no separate tax line). If there's a separate shipping/delivery charge, put that in the \"shipping\" field (0 if none). Do not include tax, shipping, the subtotal, or the grand total as one of the items — items should only be the actual products/services purchased. If the receipt only shows one total with no itemized breakdown, return a single item using the total amount and a short description of what was purchased, with tax and shipping left as 0. Leave vendor or date as an empty string if illegible.",
             },
           ],
         },
@@ -93,7 +106,7 @@ export async function POST(request) {
 
     const block = response.content.find((b) => b.type === 'text')
     if (!block) {
-      return NextResponse.json({ error: 'Could not read the receipt', receiptKey }, { status: 422 })
+      return NextResponse.json({ error: 'Could not read the receipt', receiptKeys }, { status: 422 })
     }
 
     const parsed = JSON.parse(block.text)
@@ -109,10 +122,10 @@ export async function POST(request) {
       vendor: parsed.vendor ? String(parsed.vendor).slice(0, 200) : '',
       date: /^\d{4}-\d{2}-\d{2}$/.test(parsed.date) ? parsed.date : '',
       items,
-      receiptKey,
+      receiptKeys,
     })
   } catch (err) {
     console.error('Receipt analysis failed', err)
-    return NextResponse.json({ error: 'Could not analyze receipt', receiptKey }, { status: 502 })
+    return NextResponse.json({ error: 'Could not analyze receipt', receiptKeys }, { status: 502 })
   }
 }

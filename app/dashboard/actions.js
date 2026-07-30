@@ -123,12 +123,21 @@ function collectSupplyItems(supplyAmounts, supplyItems, supplyCapitalFlags) {
   return { items, total: Math.round(total * 100) / 100 }
 }
 
+// A receipt can now be more than one photo (e.g. a long receipt shot in parts) — the
+// first key stays in the existing receipt_url column for backward compatibility, and
+// the full list (when there's more than one) goes in meta.receiptKeys.
+function receiptKeysFromFormData(formData) {
+  return formData.getAll('receiptKey').filter(Boolean)
+}
+
 function expenseFieldsFromFormData(formData) {
   const gigIdRaw = formData.get('gigId')
   const category = formData.get('category')
   const meta = extraFieldsMeta(category, formData)
   // Insurance has no standalone date field — the policy's effective start date doubles as the expense date.
   const expenseDate = category === 'insurance' ? meta.effectiveStart : formData.get('expenseDate')
+  const receiptKeys = receiptKeysFromFormData(formData)
+  if (receiptKeys.length > 1) meta.receiptKeys = receiptKeys
 
   return {
     gigId: gigIdRaw ? Number(gigIdRaw) : null,
@@ -138,7 +147,7 @@ function expenseFieldsFromFormData(formData) {
     amount: formData.get('amount'),
     vendor: formData.get('vendor'),
     meta,
-    receiptUrl: formData.get('receiptKey') || null,
+    receiptUrl: receiptKeys[0] || null,
     recurringMonthly: formData.get('recurringMonthly') === 'true',
   }
 }
@@ -156,6 +165,8 @@ export async function addExpense(formData) {
   if (category === 'meals' && mealAmounts.some(Boolean)) {
     const meta = extraFieldsMeta(category, formData)
     const mealVendors = formData.getAll('mealVendor')
+    const receiptKeys = receiptKeysFromFormData(formData)
+    if (receiptKeys.length > 1) meta.receiptKeys = receiptKeys
 
     for (let i = 0; i < mealAmounts.length; i++) {
       if (!mealAmounts[i]) continue
@@ -167,14 +178,17 @@ export async function addExpense(formData) {
         amount: mealAmounts[i],
         vendor: mealVendors[i] || null,
         meta,
+        receiptUrl: receiptKeys[0] || null,
       })
     }
   } else if (category === 'supplies' && supplyAmounts.some(Boolean)) {
     const vendor = formData.get('vendor')
     const supplyItems = formData.getAll('supplyItem')
     const supplyCapitalFlags = formData.getAll('supplyCapitalAsset')
-    const receiptUrl = formData.get('receiptKey') || null
+    const receiptKeys = receiptKeysFromFormData(formData)
     const { items, total } = collectSupplyItems(supplyAmounts, supplyItems, supplyCapitalFlags)
+    const meta = { items }
+    if (receiptKeys.length > 1) meta.receiptKeys = receiptKeys
 
     await insertExpense({
       gigId,
@@ -183,8 +197,8 @@ export async function addExpense(formData) {
       description,
       amount: total,
       vendor,
-      meta: { items },
-      receiptUrl,
+      meta,
+      receiptUrl: receiptKeys[0] || null,
     })
   } else {
     await insertExpense(expenseFieldsFromFormData(formData))
@@ -201,7 +215,10 @@ export async function editExpense(id, formData) {
     const gigIdRaw = formData.get('gigId')
     const supplyItems = formData.getAll('supplyItem')
     const supplyCapitalFlags = formData.getAll('supplyCapitalAsset')
+    const receiptKeys = receiptKeysFromFormData(formData)
     const { items, total } = collectSupplyItems(supplyAmounts, supplyItems, supplyCapitalFlags)
+    const meta = { items }
+    if (receiptKeys.length > 1) meta.receiptKeys = receiptKeys
 
     await updateExpense(id, {
       gigId: gigIdRaw ? Number(gigIdRaw) : null,
@@ -210,8 +227,8 @@ export async function editExpense(id, formData) {
       description: formData.get('description'),
       amount: total,
       vendor: formData.get('vendor'),
-      meta: { items },
-      receiptUrl: formData.get('receiptKey') || null,
+      meta,
+      receiptUrl: receiptKeys[0] || null,
     })
   } else {
     await updateExpense(id, expenseFieldsFromFormData(formData))

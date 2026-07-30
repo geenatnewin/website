@@ -3,7 +3,7 @@ import { login } from '../actions'
 import { getClientIP, checkLockout } from '../security'
 
 export const dynamic = 'force-dynamic'
-export const metadata = { title: 'Ledger — Login' }
+export const metadata = { title: 'Dashboard — Login' }
 
 export default async function LoginPage({ searchParams }) {
   const params = await searchParams

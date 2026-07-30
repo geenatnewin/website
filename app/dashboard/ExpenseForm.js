@@ -65,27 +65,52 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
   const amountRef = useRef(null)
   const descriptionRef = useRef(null)
   const extraFieldRefs = useRef({})
-  const [receiptKey, setReceiptKey] = useState(initial?.receipt_url || '')
-  const [receiptPreview, setReceiptPreview] = useState(null)
+
+  // Photos picked but not yet scanned — reviewed/removable before spending an API call.
+  const [pendingFiles, setPendingFiles] = useState([])
+  // Keys of photos already uploaded+scanned (from a prior scan this session, or from
+  // editing an existing expense). First key doubles as the legacy receipt_url column.
+  const [receiptKeys, setReceiptKeys] = useState(() => {
+    if (Array.isArray(initial?.meta?.receiptKeys) && initial.meta.receiptKeys.length) return initial.meta.receiptKeys
+    return initial?.receipt_url ? [initial.receipt_url] : []
+  })
   const [analyzing, setAnalyzing] = useState(false)
   const [analyzeError, setAnalyzeError] = useState('')
-  const [lightboxOpen, setLightboxOpen] = useState(false)
-  // receiptPreview is a fresh local blob (this session's upload); once saved, fall
-  // back to the signed-URL endpoint so a previously-attached receipt is viewable too.
-  const receiptViewSrc = receiptPreview || (receiptKey ? `/api/ledger/receipt?key=${encodeURIComponent(receiptKey)}` : null)
+  const [lightboxIndex, setLightboxIndex] = useState(null)
 
-  async function handleReceiptChange(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setReceiptPreview(URL.createObjectURL(file))
+  function handleFilesSelected(e) {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+    setPendingFiles((prev) => [
+      ...prev,
+      ...files.map((file) => ({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        file,
+        previewUrl: URL.createObjectURL(file),
+      })),
+    ])
+    setAnalyzeError('')
+    e.target.value = '' // lets the same file (or more) be picked again
+  }
+
+  function removePendingFile(id) {
+    setPendingFiles((prev) => {
+      const removed = prev.find((f) => f.id === id)
+      if (removed) URL.revokeObjectURL(removed.previewUrl)
+      return prev.filter((f) => f.id !== id)
+    })
+  }
+
+  async function scanReceipts() {
+    if (!pendingFiles.length) return
     setAnalyzing(true)
     setAnalyzeError('')
     try {
       const body = new FormData()
-      body.append('receipt', file)
+      pendingFiles.forEach(({ file }) => body.append('receipt', file))
       const res = await fetch('/api/ledger/analyze-receipt', { method: 'POST', body })
       const data = await res.json()
-      if (data.receiptKey) setReceiptKey(data.receiptKey)
+      if (Array.isArray(data.receiptKeys) && data.receiptKeys.length) setReceiptKeys(data.receiptKeys)
       if (!res.ok) throw new Error(data.error || 'Could not read the receipt')
 
       if (data.vendor && vendorRef.current) vendorRef.current.value = data.vendor
@@ -111,6 +136,9 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
           descriptionRef.current.value = data.items.map((it) => it.description).join(', ')
         }
       }
+
+      pendingFiles.forEach((f) => URL.revokeObjectURL(f.previewUrl))
+      setPendingFiles([])
     } catch (err) {
       setAnalyzeError(err.message)
     } finally {
@@ -166,33 +194,68 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
 
       {showReceiptUpload && (
         <div className="ldg-field">
-          <label htmlFor="receiptPhoto">Receipt Photo (optional)</label>
+          <label htmlFor="receiptPhoto">Receipt Photo (optional, one or more)</label>
           <input
             type="file"
             id="receiptPhoto"
             accept="image/*"
-            onChange={handleReceiptChange}
+            multiple
+            onChange={handleFilesSelected}
           />
-          {receiptViewSrc && (
-            <button
-              type="button"
-              className="ldg-receipt-preview-btn"
-              onClick={() => setLightboxOpen(true)}
-              aria-label="View full-size receipt"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={receiptViewSrc} alt="Receipt preview" className="ldg-receipt-preview" />
-            </button>
+
+          {pendingFiles.length > 0 && (
+            <>
+              <div className="ldg-receipt-pending">
+                {pendingFiles.map((f) => (
+                  <div key={f.id} className="ldg-receipt-pending-item">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={f.previewUrl} alt={f.file.name} className="ldg-receipt-preview ldg-receipt-preview-sm" />
+                    <button type="button" className="ldg-icon-btn ldg-icon-btn-danger" onClick={() => removePendingFile(f.id)}>
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button type="button" className="ldg-btn ldg-btn-calc" onClick={scanReceipts} disabled={analyzing}>
+                {analyzing ? 'Scanning…' : `Scan ${pendingFiles.length} photo${pendingFiles.length === 1 ? '' : 's'}`}
+              </button>
+              <p className="ldg-hint">Remove anything that shouldn't be here first — scanning is what actually reads the photo(s) and costs an API call.</p>
+            </>
           )}
-          {analyzing && <p className="ldg-hint">Reading receipt…</p>}
+
           {analyzeError && <p className="ldg-hint ldg-hint-error">{analyzeError}</p>}
-          {receiptKey && !analyzing && (
-            <p className="ldg-hint">✓ Receipt attached — tap the photo to view it full-size. Double-check the fields below before submitting.</p>
+
+          {receiptKeys.length > 0 && !analyzing && (
+            <>
+              <div className="ldg-receipt-pending">
+                {receiptKeys.map((key, i) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className="ldg-receipt-preview-btn"
+                    onClick={() => setLightboxIndex(i)}
+                    aria-label={`View receipt photo ${i + 1} full-size`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={`/api/ledger/receipt?key=${encodeURIComponent(key)}`} alt={`Receipt ${i + 1}`} className="ldg-receipt-preview ldg-receipt-preview-sm" />
+                  </button>
+                ))}
+              </div>
+              <p className="ldg-hint">
+                ✓ {receiptKeys.length} receipt photo{receiptKeys.length === 1 ? '' : 's'} attached — tap to view full-size. Double-check the fields below before submitting.
+              </p>
+            </>
           )}
-          <input type="hidden" name="receiptKey" value={receiptKey} readOnly />
+
+          {receiptKeys.map((key) => (
+            <input key={key} type="hidden" name="receiptKey" value={key} readOnly />
+          ))}
         </div>
       )}
-      <ReceiptLightbox src={lightboxOpen ? receiptViewSrc : null} onClose={() => setLightboxOpen(false)} />
+      <ReceiptLightbox
+        src={lightboxIndex !== null && receiptKeys[lightboxIndex] ? `/api/ledger/receipt?key=${encodeURIComponent(receiptKeys[lightboxIndex])}` : null}
+        onClose={() => setLightboxIndex(null)}
+      />
 
       {isMealsBulk ? (
         <div className="ldg-field">

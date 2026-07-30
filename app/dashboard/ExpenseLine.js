@@ -11,7 +11,7 @@ export default function ExpenseLine({ expense, showDate, editExpense, removeExpe
   const [editing, setEditing] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [expanded, setExpanded] = useState(false)
-  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState(null)
   const formRef = useRef(null)
 
   if (editing) {
@@ -27,8 +27,11 @@ export default function ExpenseLine({ expense, showDate, editExpense, removeExpe
 
   const linkedGig = expense.gig_id ? recentGigs.find((g) => g.id === expense.gig_id) : null
   const cartItems = expense.category === 'supplies' && Array.isArray(expense.meta?.items) ? expense.meta.items : null
+  const receiptKeys = Array.isArray(expense.meta?.receiptKeys) && expense.meta.receiptKeys.length
+    ? expense.meta.receiptKeys
+    : (expense.receipt_url ? [expense.receipt_url] : [])
   const hasDetails = Boolean(
-    expense.description || expense.recurring_monthly || expense.receipt_url || linkedGig || (cartItems && cartItems.length > 0)
+    expense.description || expense.recurring_monthly || receiptKeys.length > 0 || linkedGig || (cartItems && cartItems.length > 0)
   )
 
   function toggleExpanded(e) {
@@ -85,16 +88,25 @@ export default function ExpenseLine({ expense, showDate, editExpense, removeExpe
             <div>Linked gig: {new Date(linkedGig.gig_date).toLocaleDateString()} — {linkedGig.client}</div>
           )}
           {expense.recurring_monthly && <div>Recurring monthly expense</div>}
-          {expense.receipt_url && (
-            <button type="button" className="ldg-icon-btn ldg-expense-details-receipt" onClick={() => setLightboxOpen(true)}>
-              View receipt
-            </button>
+          {receiptKeys.length > 0 && (
+            <div className="ldg-expense-receipts">
+              {receiptKeys.map((key, i) => (
+                <button
+                  key={key}
+                  type="button"
+                  className="ldg-icon-btn ldg-expense-details-receipt"
+                  onClick={() => setLightboxIndex(i)}
+                >
+                  {receiptKeys.length > 1 ? `View receipt ${i + 1}` : 'View receipt'}
+                </button>
+              ))}
+            </div>
           )}
         </div>
       )}
       <ReceiptLightbox
-        src={lightboxOpen && expense.receipt_url ? `/api/ledger/receipt?key=${encodeURIComponent(expense.receipt_url)}` : null}
-        onClose={() => setLightboxOpen(false)}
+        src={lightboxIndex !== null && receiptKeys[lightboxIndex] ? `/api/ledger/receipt?key=${encodeURIComponent(receiptKeys[lightboxIndex])}` : null}
+        onClose={() => setLightboxIndex(null)}
       />
       <ConfirmModal
         open={confirming}

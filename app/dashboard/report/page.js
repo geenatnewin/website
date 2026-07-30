@@ -10,7 +10,7 @@ import PrintButton from './PrintButton'
 import CategoryDonut from './CategoryDonut'
 import QuarterBars from './QuarterBars'
 
-export const metadata = { title: 'Ledger — Overview' }
+export const metadata = { title: 'Dashboard — Overview' }
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 

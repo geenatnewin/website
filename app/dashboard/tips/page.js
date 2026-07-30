@@ -8,7 +8,7 @@ import RemindersBanner from '../RemindersBanner'
 import EstimatedTaxCard from './EstimatedTaxCard'
 import HomeOfficeCard from './HomeOfficeCard'
 
-export const metadata = { title: 'Ledger — Tips' }
+export const metadata = { title: 'Dashboard — Tips' }
 
 export default async function TipsPage() {
   const [gigs, expenses] = await Promise.all([getGigs(), getExpenses()])

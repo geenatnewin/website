@@ -9,7 +9,7 @@ import RevealAmount from './RevealAmount'
 import LedgerShell from './LedgerShell'
 import RemindersBanner from './RemindersBanner'
 
-export const metadata = { title: 'Ledger' }
+export const metadata = { title: 'Dashboard' }
 
 export default async function LedgerDashboard() {
   const [gigs, expenses, recentGigs] = await Promise.all([

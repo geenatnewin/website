@@ -1,7 +1,7 @@
 import './ledger.css'
 
 export const metadata = {
-  title: 'Ledger',
+  title: 'Dashboard',
   description: 'Gig income & expense tracker',
 }
 
