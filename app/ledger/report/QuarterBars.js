@@ -1,3 +1,5 @@
+import { formatMoney } from '../format'
+
 export default function QuarterBars({ quarters, currentIndex }) {
   const chartHeight = 140
   const zeroY = chartHeight / 2
@@ -34,7 +36,7 @@ export default function QuarterBars({ quarters, currentIndex }) {
               textAnchor="middle"
               className="ldg-bar-value"
             >
-              ${net.toFixed(0)}
+              ${formatMoney(net, 0)}
             </text>
             <text x={x + barWidth / 2} y={chartHeight + 20} textAnchor="middle" className="ldg-bar-label">
               {q.label}{i === currentIndex ? ' •' : ''}

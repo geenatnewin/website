@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { getGigs, getExpenses, getRecentGigsForDropdown } from './db'
 import { addGig, editGig, removeGig, addExpense, editExpense, removeExpense, logout } from './actions'
 import { mileageDeduction } from './mileage'
+import { formatMoney } from './format'
 import AddForms from './AddForms'
 import RevealAmount from './RevealAmount'
 import LedgerShell from './LedgerShell'
@@ -47,19 +48,19 @@ export default async function LedgerDashboard() {
       <section className="ldg-stat-grid">
         <div className="ldg-stat-card ldg-stat-grad-1">
           <span className="ldg-stat-label">Income (all-time)</span>
-          <RevealAmount value={`$${totalIncome.toFixed(2)}`} />
+          <RevealAmount value={`$${formatMoney(totalIncome)}`} />
         </div>
         <div className="ldg-stat-card ldg-stat-grad-2">
           <span className="ldg-stat-label">Expenses (all-time)</span>
-          <RevealAmount value={`$${totalExpenses.toFixed(2)}`} />
+          <RevealAmount value={`$${formatMoney(totalExpenses)}`} />
         </div>
         <div className="ldg-stat-card ldg-stat-grad-3">
           <span className="ldg-stat-label">Mileage deduction</span>
-          <RevealAmount value={`$${totalMileageDeduction.toFixed(2)}`} />
+          <RevealAmount value={`$${formatMoney(totalMileageDeduction)}`} />
         </div>
         <div className={`ldg-stat-card ${net < 0 ? 'ldg-stat-grad-critical' : 'ldg-stat-grad-good'}`}>
           <span className="ldg-stat-label">Net</span>
-          <RevealAmount value={`$${net.toFixed(2)}`} />
+          <RevealAmount value={`$${formatMoney(net)}`} />
         </div>
       </section>
 

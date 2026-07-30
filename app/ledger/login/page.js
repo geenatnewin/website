@@ -1,6 +1,7 @@
 import { headers } from 'next/headers'
 import { login } from '../actions'
 import { getClientIP, checkLockout } from '../security'
+import LoginForm from './LoginForm'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Ledger — Login' }
@@ -24,25 +25,15 @@ export default async function LoginPage({ searchParams }) {
             {lockout.until ? ` until ${lockout.until.toLocaleTimeString()}.` : ' for 10 minutes.'}
           </p>
         ) : (
-          <form action={login} className="ldg-login-form">
-            <label className="ldg-label" htmlFor="password">Password</label>
-            <input
-              className="ldg-input"
-              type="password"
-              id="password"
-              name="password"
-              required
-              autoFocus
-              autoComplete="current-password"
-            />
-            <button className="ldg-btn" type="submit">Enter</button>
+          <>
+            <LoginForm login={login} />
             {hasError && (
               <p className="ldg-error">
-                Wrong password.
+                Wrong username or password.
                 {remaining != null && ` ${remaining} attempt${remaining === 1 ? '' : 's'} left before a 10-minute lockout.`}
               </p>
             )}
-          </form>
+          </>
         )}
       </div>
     </div>

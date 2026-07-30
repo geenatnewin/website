@@ -4,6 +4,7 @@ import { getGigs, getExpenses } from '../db'
 import { logout } from '../actions'
 import { mileageDeduction } from '../mileage'
 import { EXPENSE_CATEGORIES, MILEAGE_CHART_COLOR, deductibleAmount } from '../categories'
+import { formatMoney } from '../format'
 import LedgerShell from '../LedgerShell'
 import PrintButton from './PrintButton'
 import CategoryDonut from './CategoryDonut'
@@ -96,7 +97,7 @@ export default async function LedgerReport() {
         <p className="ldg-card-title">Summary (Schedule C style)</p>
         <div className="ldg-report-row ldg-report-income">
           <span>Gross receipts</span>
-          <span>${totalIncome.toFixed(2)}</span>
+          <span>${formatMoney(totalIncome)}</span>
         </div>
         {EXPENSE_CATEGORIES.map((c) => (
           <div className="ldg-report-row" key={c.value}>
@@ -105,9 +106,9 @@ export default async function LedgerReport() {
               {c.label} <span className="ldg-report-sub">{c.scheduleC}</span>
             </span>
             <span>
-              ${byCategory[c.value].toFixed(2)}
+              ${formatMoney(byCategory[c.value])}
               {Math.abs(byCategoryRaw[c.value] - byCategory[c.value]) > 0.004 && (
-                <span className="ldg-report-sub"> (of ${byCategoryRaw[c.value].toFixed(2)} spent)</span>
+                <span className="ldg-report-sub"> (of ${formatMoney(byCategoryRaw[c.value])} spent)</span>
               )}
             </span>
           </div>
@@ -117,15 +118,15 @@ export default async function LedgerReport() {
             <span className="ldg-legend-dot" style={{ background: `var(--chart-${MILEAGE_CHART_COLOR})` }} />
             Car & truck expenses (mileage) <span className="ldg-report-sub">Line 9 · {totalMileage.toFixed(1)} mi</span>
           </span>
-          <span>${mileageDeductionTotal.toFixed(2)}</span>
+          <span>${formatMoney(mileageDeductionTotal)}</span>
         </div>
         <div className="ldg-report-row ldg-report-total">
           <span>Total expenses</span>
-          <span>${totalExpenses.toFixed(2)}</span>
+          <span>${formatMoney(totalExpenses)}</span>
         </div>
         <div className={`ldg-report-row ldg-report-total ${netProfit < 0 ? 'ldg-negative' : 'ldg-positive'}`}>
           <span>Net profit</span>
-          <span>${netProfit.toFixed(2)}</span>
+          <span>${formatMoney(netProfit)}</span>
         </div>
       </section>
 
@@ -135,7 +136,7 @@ export default async function LedgerReport() {
         {likely1099.map(([client, total]) => (
           <div className="ldg-report-row" key={client}>
             <span>{client} <span className="ldg-badge ldg-badge-warning">1099</span></span>
-            <span>${total.toFixed(2)}</span>
+            <span>${formatMoney(total)}</span>
           </div>
         ))}
       </section>

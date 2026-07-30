@@ -10,9 +10,9 @@ export async function POST(request) {
     return NextResponse.json({ locked: true, until: lockout.until }, { status: 429 })
   }
 
-  const { password } = await request.json().catch(() => ({}))
+  const { username, password } = await request.json().catch(() => ({}))
 
-  if (password !== process.env.LEDGER_PASSWORD) {
+  if (username !== process.env.LEDGER_USERNAME || password !== process.env.LEDGER_PASSWORD) {
     const result = await recordFailedAttempt(ip)
     if (result.lockedOut) {
       return NextResponse.json({ locked: true, until: result.until }, { status: 429 })

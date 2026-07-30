@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { categoryLabel, metaSummary } from './categories'
+import { formatMoney } from './format'
 import ExpenseForm from './ExpenseForm'
 
 export default function ExpenseLine({ expense, showDate, editExpense, removeExpense, recentGigs }) {
@@ -28,7 +29,7 @@ export default function ExpenseLine({ expense, showDate, editExpense, removeExpe
         {showDate && <span>{new Date(expense.expense_date).toLocaleDateString()}</span>}
         <span>{categoryLabel(expense.category)}</span>
         <span>{expense.vendor || '—'}</span>
-        <span className="ldg-expense-amount">${Number(expense.amount).toFixed(2)}</span>
+        <span className="ldg-expense-amount">${formatMoney(expense.amount)}</span>
         <div className="ldg-entry-controls ldg-entry-controls-sm">
           <button type="button" className="ldg-icon-btn" onClick={() => setEditing(true)}>Edit</button>
           <form action={removeExpense.bind(null, expense.id)}>

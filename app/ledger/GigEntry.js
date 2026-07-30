@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { mileageDeduction } from './mileage'
+import { formatMoney } from './format'
 import GigForm from './GigForm'
 import ExpenseLine from './ExpenseLine'
 
@@ -42,7 +43,7 @@ export default function GigEntry({
           {gig.gig_type === 'other' && gig.gig_type_other ? gig.gig_type_other : gig.gig_type}
         </span>
         <span className={`ldg-status ldg-status-${gig.status}`}>{gig.status}</span>
-        <span className="ldg-entry-amount">${Number(gig.gross_payment).toFixed(2)}</span>
+        <span className="ldg-entry-amount">${formatMoney(gig.gross_payment)}</span>
         <div className="ldg-entry-controls">
           <button type="button" className="ldg-icon-btn" onClick={() => setEditing(true)}>Edit</button>
           <form action={removeGig.bind(null, gig.id)}>
@@ -52,7 +53,7 @@ export default function GigEntry({
       </div>
       {Number(gig.mileage) > 0 && (
         <div className="ldg-entry-sub">
-          Mileage: {gig.mileage} mi → ${mileageDeduction(gig.gig_date, gig.mileage).toFixed(2)} deduction (est.)
+          Mileage: {gig.mileage} mi → ${formatMoney(mileageDeduction(gig.gig_date, gig.mileage))} deduction (est.)
         </div>
       )}
       {gig.notes && <div className="ldg-entry-sub">{gig.notes}</div>}

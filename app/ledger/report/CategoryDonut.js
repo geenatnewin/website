@@ -1,3 +1,5 @@
+import { formatMoney } from '../format'
+
 export default function CategoryDonut({ segments }) {
   const total = segments.reduce((s, x) => s + x.value, 0)
   if (total <= 0) return <p className="ldg-empty">No expenses yet.</p>
@@ -39,7 +41,7 @@ export default function CategoryDonut({ segments }) {
           <li key={seg.label}>
             <span className="ldg-legend-dot" style={{ background: `var(--chart-${seg.color})` }} />
             <span>{seg.label}</span>
-            <span className="ldg-legend-value">${seg.value.toFixed(2)}</span>
+            <span className="ldg-legend-value">${formatMoney(seg.value)}</span>
           </li>
         ))}
       </ul>

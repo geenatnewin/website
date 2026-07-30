@@ -1,4 +1,5 @@
 import { nextQuarterlyDeadline, daysUntil, contractorsOwed1099, stalePendingGigs } from './taxTips'
+import { formatMoney } from './format'
 
 export default function RemindersBanner({ gigs, expenses }) {
   const deadline = nextQuarterlyDeadline()
@@ -26,7 +27,7 @@ export default function RemindersBanner({ gigs, expenses }) {
             {contractors.map(([name, total], i) => (
               <span key={name}>
                 {i > 0 && ', '}
-                <strong>{name}</strong> ${total.toFixed(2)}
+                <strong>{name}</strong> ${formatMoney(total)}
               </span>
             ))}{' '}
             this year — over the $600 threshold, so you may need to send{' '}
