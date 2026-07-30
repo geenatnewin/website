@@ -7,16 +7,16 @@ export default function LedgerShell({ active, logout, children }) {
 
           <div className="ldg-sidebar-group">
             <p className="ldg-sidebar-label">Menu</p>
-            <a href="/ledger" className={`ldg-sidebar-link ${active === 'dashboard' ? 'ldg-sidebar-link-active' : ''}`}>
+            <a href="/dashboard" className={`ldg-sidebar-link ${active === 'dashboard' ? 'ldg-sidebar-link-active' : ''}`}>
               Dashboard
             </a>
-            <a href="/ledger/report" className={`ldg-sidebar-link ${active === 'report' ? 'ldg-sidebar-link-active' : ''}`}>
+            <a href="/dashboard/report" className={`ldg-sidebar-link ${active === 'report' ? 'ldg-sidebar-link-active' : ''}`}>
               Report
             </a>
-            <a href="/ledger/tips" className={`ldg-sidebar-link ${active === 'tips' ? 'ldg-sidebar-link-active' : ''}`}>
+            <a href="/dashboard/tips" className={`ldg-sidebar-link ${active === 'tips' ? 'ldg-sidebar-link-active' : ''}`}>
               Tips
             </a>
-            <a href="/ledger/security" className={`ldg-sidebar-link ${active === 'security' ? 'ldg-sidebar-link-active' : ''}`}>
+            <a href="/dashboard/security" className={`ldg-sidebar-link ${active === 'security' ? 'ldg-sidebar-link-active' : ''}`}>
               Security
             </a>
           </div>

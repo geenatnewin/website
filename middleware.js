@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server'
-import { computeSessionToken, LEDGER_COOKIE } from './app/ledger/token'
+import { computeSessionToken, LEDGER_COOKIE } from './app/dashboard/token'
 
 export const config = {
-  matcher: ['/ledger/:path*', '/api/ledger/:path*'],
+  matcher: ['/dashboard/:path*', '/api/ledger/:path*'],
 }
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  if (pathname === '/ledger/login' || pathname === '/api/ledger/login') {
+  if (pathname === '/dashboard/login' || pathname === '/api/ledger/login') {
     return NextResponse.next()
   }
 
@@ -19,6 +19,6 @@ export async function middleware(request) {
     return NextResponse.next()
   }
 
-  const loginUrl = new URL('/ledger/login', request.url)
+  const loginUrl = new URL('/dashboard/login', request.url)
   return NextResponse.redirect(loginUrl)
 }

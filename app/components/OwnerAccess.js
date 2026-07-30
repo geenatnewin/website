@@ -37,7 +37,7 @@ export default function OwnerAccess() {
         body: JSON.stringify({ password }),
       })
       if (res.ok) {
-        window.location.href = '/ledger'
+        window.location.href = '/dashboard'
         return
       }
       const data = await res.json().catch(() => ({}))
@@ -54,7 +54,7 @@ export default function OwnerAccess() {
     }
   }
 
-  if (pathname?.startsWith('/ledger')) return null
+  if (pathname?.startsWith('/dashboard')) return null
 
   return (
     <div className="owner-access" ref={wrapRef}>

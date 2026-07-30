@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { computeSessionToken, LEDGER_COOKIE } from '../../../ledger/token'
-import { getClientIP, checkLockout, recordFailedAttempt, recordSuccessfulLogin } from '../../../ledger/security'
+import { computeSessionToken, LEDGER_COOKIE } from '../../../dashboard/token'
+import { getClientIP, checkLockout, recordFailedAttempt, recordSuccessfulLogin } from '../../../dashboard/security'
 
 export async function POST(request) {
   const ip = getClientIP(request.headers)

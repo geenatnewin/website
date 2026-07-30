@@ -46,7 +46,7 @@ export default function RemindersBanner({ gigs, expenses }) {
         </div>
       )}
 
-      <a href="/ledger/tips" className="ldg-reminder-link">See all tax tips →</a>
+      <a href="/dashboard/tips" className="ldg-reminder-link">See all tax tips →</a>
     </section>
   )
 }

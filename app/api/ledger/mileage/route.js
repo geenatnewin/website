@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { roundTripMilesFromHome } from '../../../ledger/mileageLookup'
+import { roundTripMilesFromHome } from '../../../dashboard/mileageLookup'
 
 export async function GET(request) {
   const address = request.nextUrl.searchParams.get('address')

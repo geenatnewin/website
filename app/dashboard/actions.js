@@ -13,16 +13,16 @@ export async function login(formData) {
 
   const lockout = await checkLockout(ip)
   if (lockout.locked) {
-    redirect('/ledger/login?locked=1')
+    redirect('/dashboard/login?locked=1')
   }
 
   const password = formData.get('password')
   if (password !== process.env.LEDGER_PASSWORD) {
     const result = await recordFailedAttempt(ip)
     if (result.lockedOut) {
-      redirect('/ledger/login?locked=1')
+      redirect('/dashboard/login?locked=1')
     }
-    redirect(`/ledger/login?error=1&remaining=${result.remaining}`)
+    redirect(`/dashboard/login?error=1&remaining=${result.remaining}`)
   }
 
   await recordSuccessfulLogin(ip)
@@ -34,12 +34,12 @@ export async function login(formData) {
     maxAge: 60 * 60 * 24 * 90,
     path: '/',
   })
-  redirect('/ledger')
+  redirect('/dashboard')
 }
 
 export async function logout() {
   cookies().delete(LEDGER_COOKIE)
-  redirect('/ledger/login')
+  redirect('/dashboard/login')
 }
 
 export async function addGig(formData) {
@@ -55,8 +55,8 @@ export async function addGig(formData) {
     mileage: formData.get('mileage'),
     notes: formData.get('notes'),
   })
-  revalidatePath('/ledger')
-  revalidatePath('/ledger/report')
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/report')
 }
 
 export async function editGig(id, formData) {
@@ -72,14 +72,14 @@ export async function editGig(id, formData) {
     mileage: formData.get('mileage'),
     notes: formData.get('notes'),
   })
-  revalidatePath('/ledger')
-  revalidatePath('/ledger/report')
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/report')
 }
 
 export async function removeGig(id) {
   await deleteGig(id)
-  revalidatePath('/ledger')
-  revalidatePath('/ledger/report')
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/report')
 }
 
 function addMonthsISO(dateStr, months) {
@@ -174,18 +174,18 @@ export async function addExpense(formData) {
   } else {
     await insertExpense(expenseFieldsFromFormData(formData))
   }
-  revalidatePath('/ledger')
-  revalidatePath('/ledger/report')
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/report')
 }
 
 export async function editExpense(id, formData) {
   await updateExpense(id, expenseFieldsFromFormData(formData))
-  revalidatePath('/ledger')
-  revalidatePath('/ledger/report')
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/report')
 }
 
 export async function removeExpense(id) {
   await deleteExpense(id)
-  revalidatePath('/ledger')
-  revalidatePath('/ledger/report')
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/report')
 }

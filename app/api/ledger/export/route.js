@@ -1,6 +1,6 @@
-import { getGigs, getExpenses } from '../../../ledger/db'
-import { categoryLabel, deductibleAmount, metaSummary } from '../../../ledger/categories'
-import { mileageDeduction } from '../../../ledger/mileage'
+import { getGigs, getExpenses } from '../../../dashboard/db'
+import { categoryLabel, deductibleAmount, metaSummary } from '../../../dashboard/categories'
+import { mileageDeduction } from '../../../dashboard/mileage'
 
 export const dynamic = 'force-dynamic'
 
