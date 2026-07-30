@@ -251,6 +251,27 @@
   margin-bottom: 1.1rem;
 }
 
+/* ── MONTH GROUPS (Gigs/Expenses lists) ── */
+.ldg-month-group { margin-bottom: 0.6rem; }
+.ldg-month-group:last-child { margin-bottom: 0; }
+.ldg-month-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  border: none;
+  background: var(--card-alt);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  cursor: pointer;
+  text-align: left;
+}
+.ldg-month-header:hover { background: #2e2540; }
+.ldg-month-header:focus-visible { outline: 2px solid #2f7cf6; outline-offset: 2px; }
+.ldg-month-label { font-weight: 700; font-size: 0.88rem; color: var(--text-primary); }
+.ldg-month-meta { margin-left: auto; font-size: 0.76rem; color: var(--text-muted); white-space: nowrap; }
+.ldg-month-body { padding-top: 0.6rem; }
+
 /* ── ADD BUTTONS / FORMS ── */
 .ldg-add-section { margin-bottom: 1.5rem; }
 .ldg-add-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
@@ -765,6 +786,8 @@
   .ldg-report-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 720px) {
+  .ldg-month-header { flex-wrap: wrap; row-gap: 0.2rem; }
+  .ldg-month-meta { margin-left: 1.4rem; }
   .ldg-page-bg { padding: 0; }
   .ldg-shell { flex-direction: column; border-radius: 0; }
   .ldg-sidebar {

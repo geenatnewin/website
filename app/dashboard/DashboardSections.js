@@ -5,6 +5,23 @@ import GigForm from './GigForm'
 import ExpenseForm from './ExpenseForm'
 import GigEntry from './GigEntry'
 import ExpenseLine from './ExpenseLine'
+import MonthSection from './MonthSection'
+import { formatMoney } from './format'
+
+// gigs/generalExpenses arrive pre-sorted DESC by date from the DB query, and Map
+// preserves insertion order, so groups come out newest-month-first for free.
+function groupByMonth(entries, dateField) {
+  const groups = new Map()
+  for (const entry of entries) {
+    const d = new Date(entry[dateField])
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    if (!groups.has(key)) {
+      groups.set(key, { key, label: d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }), entries: [] })
+    }
+    groups.get(key).entries.push(entry)
+  }
+  return Array.from(groups.values())
+}
 
 export default function DashboardSections({
   gigs,
@@ -50,6 +67,12 @@ export default function DashboardSections({
     setOpenBox((current) => (current === name ? null : name))
   }
 
+  // Numbering ("008", "007"...) has to reflect position in the full flat list, not
+  // position within a month's group — compute it once up front, before grouping.
+  const gigDisplayNums = new Map(gigs.map((g, i) => [g.id, String(gigs.length - i).padStart(3, '0')]))
+  const gigMonths = groupByMonth(gigs, 'gig_date')
+  const expenseMonths = groupByMonth(generalExpenses, 'expense_date')
+
   return (
     <>
       <section className="ldg-add-section">
@@ -87,18 +110,28 @@ export default function DashboardSections({
           </div>
 
           {gigs.length === 0 && <p className="ldg-empty">No gigs logged yet.</p>}
-          {gigs.map((g, i) => (
-            <GigEntry
-              key={g.id}
-              gig={g}
-              displayNum={String(gigs.length - i).padStart(3, '0')}
-              expenses={expensesByGig[g.id] || []}
-              editGig={editGig}
-              removeGig={removeGig}
-              editExpense={editExpense}
-              removeExpense={removeExpense}
-              recentGigs={recentGigs}
-            />
+          {gigMonths.map((group, gi) => (
+            <MonthSection
+              key={group.key}
+              label={group.label}
+              count={group.entries.length}
+              totalLabel={`$${formatMoney(group.entries.reduce((s, g) => s + Number(g.gross_payment), 0))}`}
+              defaultOpen={gi === 0}
+            >
+              {group.entries.map((g) => (
+                <GigEntry
+                  key={g.id}
+                  gig={g}
+                  displayNum={gigDisplayNums.get(g.id)}
+                  expenses={expensesByGig[g.id] || []}
+                  editGig={editGig}
+                  removeGig={removeGig}
+                  editExpense={editExpense}
+                  removeExpense={removeExpense}
+                  recentGigs={recentGigs}
+                />
+              ))}
+            </MonthSection>
           ))}
         </section>
       )}
@@ -119,15 +152,25 @@ export default function DashboardSections({
           </div>
 
           {generalExpenses.length === 0 && <p className="ldg-empty">No general expenses logged yet.</p>}
-          {generalExpenses.map((e) => (
-            <ExpenseLine
-              key={e.id}
-              expense={e}
-              showDate
-              editExpense={editExpense}
-              removeExpense={removeExpense}
-              recentGigs={recentGigs}
-            />
+          {expenseMonths.map((group, gi) => (
+            <MonthSection
+              key={group.key}
+              label={group.label}
+              count={group.entries.length}
+              totalLabel={`$${formatMoney(group.entries.reduce((s, e) => s + Number(e.amount), 0))}`}
+              defaultOpen={gi === 0}
+            >
+              {group.entries.map((e) => (
+                <ExpenseLine
+                  key={e.id}
+                  expense={e}
+                  showDate
+                  editExpense={editExpense}
+                  removeExpense={removeExpense}
+                  recentGigs={recentGigs}
+                />
+              ))}
+            </MonthSection>
           ))}
         </section>
       )}
