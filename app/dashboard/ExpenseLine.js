@@ -26,7 +26,10 @@ export default function ExpenseLine({ expense, showDate, editExpense, removeExpe
   }
 
   const linkedGig = expense.gig_id ? recentGigs.find((g) => g.id === expense.gig_id) : null
-  const hasDetails = Boolean(expense.description || expense.recurring_monthly || expense.receipt_url || linkedGig)
+  const cartItems = expense.category === 'supplies' && Array.isArray(expense.meta?.items) ? expense.meta.items : null
+  const hasDetails = Boolean(
+    expense.description || expense.recurring_monthly || expense.receipt_url || linkedGig || (cartItems && cartItems.length > 0)
+  )
 
   function toggleExpanded(e) {
     if (e.key !== undefined && e.key !== 'Enter' && e.key !== ' ') return
@@ -67,6 +70,16 @@ export default function ExpenseLine({ expense, showDate, editExpense, removeExpe
       )}
       {expanded && hasDetails && (
         <div className="ldg-expense-details">
+          {cartItems && cartItems.length > 0 && (
+            <div className="ldg-expense-items">
+              {cartItems.map((it, i) => (
+                <div className="ldg-expense-item-row" key={i}>
+                  <span>{it.name || '—'}{it.capitalAsset ? ' · Capital asset' : ''}</span>
+                  <span>${formatMoney(it.amount)}</span>
+                </div>
+              ))}
+            </div>
+          )}
           {expense.description && <div>{expense.description}</div>}
           {linkedGig && (
             <div>Linked gig: {new Date(linkedGig.gig_date).toLocaleDateString()} — {linkedGig.client}</div>

@@ -107,6 +107,22 @@ function extraFieldsMeta(category, formData) {
   return meta
 }
 
+// A multi-item receipt is one purchase (one cart), so it's stored as a single expense
+// row with an itemized meta.items array rather than one row per item — each item still
+// keeps its own capitalAsset flag for the $2,500 depreciation threshold.
+function collectSupplyItems(supplyAmounts, supplyItems, supplyCapitalFlags) {
+  const items = []
+  let total = 0
+  for (let i = 0; i < supplyAmounts.length; i++) {
+    if (!supplyAmounts[i]) continue
+    const amount = Number(supplyAmounts[i])
+    if (!Number.isFinite(amount)) continue
+    total += amount
+    items.push({ name: supplyItems[i] || '', amount, capitalAsset: supplyCapitalFlags[i] === 'true' })
+  }
+  return { items, total: Math.round(total * 100) / 100 }
+}
+
 function expenseFieldsFromFormData(formData) {
   const gigIdRaw = formData.get('gigId')
   const category = formData.get('category')
@@ -158,23 +174,18 @@ export async function addExpense(formData) {
     const supplyItems = formData.getAll('supplyItem')
     const supplyCapitalFlags = formData.getAll('supplyCapitalAsset')
     const receiptUrl = formData.get('receiptKey') || null
+    const { items, total } = collectSupplyItems(supplyAmounts, supplyItems, supplyCapitalFlags)
 
-    for (let i = 0; i < supplyAmounts.length; i++) {
-      if (!supplyAmounts[i]) continue
-      const meta = {}
-      if (supplyItems[i]) meta.item = supplyItems[i]
-      if (supplyCapitalFlags[i] === 'true') meta.capitalAsset = 'true'
-      await insertExpense({
-        gigId,
-        expenseDate,
-        category,
-        description,
-        amount: supplyAmounts[i],
-        vendor,
-        meta,
-        receiptUrl,
-      })
-    }
+    await insertExpense({
+      gigId,
+      expenseDate,
+      category,
+      description,
+      amount: total,
+      vendor,
+      meta: { items },
+      receiptUrl,
+    })
   } else {
     await insertExpense(expenseFieldsFromFormData(formData))
   }
@@ -183,7 +194,28 @@ export async function addExpense(formData) {
 }
 
 export async function editExpense(id, formData) {
-  await updateExpense(id, expenseFieldsFromFormData(formData))
+  const category = formData.get('category')
+  const supplyAmounts = formData.getAll('supplyAmount')
+
+  if (category === 'supplies' && supplyAmounts.some(Boolean)) {
+    const gigIdRaw = formData.get('gigId')
+    const supplyItems = formData.getAll('supplyItem')
+    const supplyCapitalFlags = formData.getAll('supplyCapitalAsset')
+    const { items, total } = collectSupplyItems(supplyAmounts, supplyItems, supplyCapitalFlags)
+
+    await updateExpense(id, {
+      gigId: gigIdRaw ? Number(gigIdRaw) : null,
+      expenseDate: formData.get('expenseDate'),
+      category,
+      description: formData.get('description'),
+      amount: total,
+      vendor: formData.get('vendor'),
+      meta: { items },
+      receiptUrl: formData.get('receiptKey') || null,
+    })
+  } else {
+    await updateExpense(id, expenseFieldsFromFormData(formData))
+  }
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/report')
 }

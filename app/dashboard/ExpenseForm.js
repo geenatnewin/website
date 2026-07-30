@@ -16,8 +16,10 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
   const expenseCategoryConfig = categoryConfig(expenseCategory)
   const isInsurance = expenseCategory === 'insurance'
   const isMealsBulk = !isEdit && expenseCategory === 'meals'
-  const isSuppliesBulk = !isEdit && expenseCategory === 'supplies'
-  const showReceiptUpload = expenseCategory === 'supplies' || expenseCategory === 'meals'
+  // Supplies always uses the itemized-cart UI, on add AND edit, so a multi-item
+  // purchase stays one expense with a per-item breakdown instead of splitting apart.
+  const isSuppliesBulk = expenseCategory === 'supplies'
+  const showReceiptUpload = !isInsurance
 
   const [billingFrequency, setBillingFrequency] = useState(initial?.meta?.billingFrequency || 'Monthly')
 
@@ -32,7 +34,22 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
     setMealRows((rows) => rows.filter((_, i) => i !== index))
   }
 
-  const [supplyRows, setSupplyRows] = useState([{ item: '', amount: '', capitalAsset: false }])
+  const [supplyRows, setSupplyRows] = useState(() => {
+    if (initial?.category === 'supplies') {
+      if (Array.isArray(initial?.meta?.items) && initial.meta.items.length) {
+        return initial.meta.items.map((it) => ({
+          item: it.name || '',
+          amount: String(it.amount ?? ''),
+          capitalAsset: Boolean(it.capitalAsset),
+        }))
+      }
+      // Legacy single-item format from before carts were combined into one expense.
+      if (initial?.meta?.item) {
+        return [{ item: initial.meta.item, amount: String(initial.amount ?? ''), capitalAsset: initial.meta.capitalAsset === 'true' }]
+      }
+    }
+    return [{ item: '', amount: '', capitalAsset: false }]
+  })
   function updateSupplyRow(index, field, value) {
     setSupplyRows((rows) => rows.map((row, i) => (i === index ? { ...row, [field]: value } : row)))
   }
@@ -46,6 +63,7 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
   const vendorRef = useRef(null)
   const expenseDateRef = useRef(null)
   const amountRef = useRef(null)
+  const descriptionRef = useRef(null)
   const extraFieldRefs = useRef({})
   const [receiptKey, setReceiptKey] = useState(initial?.receipt_url || '')
   const [receiptPreview, setReceiptPreview] = useState(null)
@@ -85,9 +103,13 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
           return updated
         })
       } else if (!isSuppliesBulk && !isMealsBulk && data.items?.length) {
-        const first = data.items[0]
-        if (amountRef.current) amountRef.current.value = String(first.amount)
-        if (extraFieldRefs.current.item) extraFieldRefs.current.item.value = first.description
+        // Multiple line items on a receipt for a category without per-item tracking —
+        // use the combined total and fold the item names into the description.
+        const total = data.items.reduce((sum, it) => sum + it.amount, 0)
+        if (amountRef.current) amountRef.current.value = String(Math.round(total * 100) / 100)
+        if (descriptionRef.current && !descriptionRef.current.value) {
+          descriptionRef.current.value = data.items.map((it) => it.description).join(', ')
+        }
       }
     } catch (err) {
       setAnalyzeError(err.message)
@@ -264,7 +286,7 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
               </div>
             ))}
             <button type="button" className="ldg-btn ldg-btn-calc" onClick={addSupplyRow}>+ Add another item</button>
-            <p className="ldg-hint">One row per item — each is logged as its own expense line.</p>
+            <p className="ldg-hint">One row per item in this purchase — they're saved together as a single expense, itemized (click the entry afterward to see the breakdown).</p>
           </div>
         </>
       ) : (
@@ -381,7 +403,7 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
 
       <div className="ldg-field">
         <label htmlFor="description">Description</label>
-        <input type="text" id="description" name="description" defaultValue={initial?.description || ''} />
+        <input type="text" id="description" name="description" ref={descriptionRef} defaultValue={initial?.description || ''} />
       </div>
 
       <div className="ldg-form-actions">

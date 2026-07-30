@@ -108,6 +108,18 @@ export function deductibleAmount(category, amount, meta) {
 }
 
 export function metaSummary(category, meta) {
+  // Multi-item supply purchases (one cart = one expense) store their items array
+  // instead of the single item/capitalAsset fields below — summarize separately.
+  if (category === 'supplies' && Array.isArray(meta?.items)) {
+    if (meta.items.length === 0) return ''
+    if (meta.items.length === 1) {
+      const only = meta.items[0]
+      if (!only.name) return ''
+      return `Item / equipment: ${only.name}${only.capitalAsset ? ' · Capital asset' : ''}`
+    }
+    return `${meta.items.length} items`
+  }
+
   const config = categoryConfig(category)
   if (!config?.extraFields || !meta) return ''
   const parts = []

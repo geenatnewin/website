@@ -14,6 +14,18 @@ function isoDate(dateInput) {
   return new Date(dateInput).toISOString().slice(0, 10)
 }
 
+// metaSummary() compresses a multi-item cart down to "N items" for the on-screen
+// list — the CSV goes to the tax preparer, so it needs the actual item-level
+// breakdown (name, amount, capital-asset flag) instead of that compact count.
+function expenseDetails(e) {
+  if (e.category === 'supplies' && Array.isArray(e.meta?.items) && e.meta.items.length > 1) {
+    return e.meta.items
+      .map((it) => `${it.name || 'item'} ($${Number(it.amount).toFixed(2)})${it.capitalAsset ? ' [capital asset]' : ''}`)
+      .join('; ')
+  }
+  return metaSummary(e.category, e.meta)
+}
+
 export async function GET() {
   const [gigs, expenses] = await Promise.all([getGigs(), getExpenses()])
 
@@ -49,7 +61,7 @@ export async function GET() {
         deductibleAmount(e.category, e.amount, e.meta).toFixed(2),
         '',
         '',
-        csvEscape(metaSummary(e.category, e.meta)),
+        csvEscape(expenseDetails(e)),
         csvEscape(e.description || ''),
       ].join(',')
     )

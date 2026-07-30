@@ -605,6 +605,21 @@
 }
 .ldg-expense-details-receipt { padding-left: 0; }
 
+.ldg-expense-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+  margin-bottom: 0.15rem;
+}
+.ldg-expense-item-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+.ldg-expense-item-row span:last-child { color: var(--text-primary); font-weight: 600; flex: 0 0 auto; }
+
 /* ── LOGIN ── */
 .ldg-login-wrap {
   min-height: 100%;
