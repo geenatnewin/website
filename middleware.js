@@ -8,7 +8,7 @@ export const config = {
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  if (pathname === '/ledger/login') {
+  if (pathname === '/ledger/login' || pathname === '/api/ledger/login') {
     return NextResponse.next()
   }
 

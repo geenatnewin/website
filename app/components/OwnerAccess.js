@@ -1,0 +1,73 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+
+export default function OwnerAccess() {
+  const [open, setOpen] = useState(false)
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const wrapRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    function handleClickOutside(e) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
+        setOpen(false)
+        setError(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setLoading(true)
+    setError(false)
+    try {
+      const res = await fetch('/api/ledger/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      })
+      if (res.ok) {
+        window.location.href = '/ledger'
+      } else {
+        setError(true)
+        setLoading(false)
+      }
+    } catch {
+      setError(true)
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="owner-access" ref={wrapRef}>
+      {!open ? (
+        <button
+          type="button"
+          className="owner-access-trigger"
+          onClick={() => setOpen(true)}
+          aria-label="Owner access"
+        >
+          owner access
+        </button>
+      ) : (
+        <form className="owner-access-form" onSubmit={handleSubmit}>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="password"
+            autoFocus
+            className="owner-access-input"
+          />
+          <button type="submit" className="owner-access-go" disabled={loading} aria-label="Enter">→</button>
+          {error && <span className="owner-access-error">wrong</span>}
+        </form>
+      )}
+    </div>
+  )
+}
