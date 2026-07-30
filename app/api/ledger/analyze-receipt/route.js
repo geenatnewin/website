@@ -23,8 +23,12 @@ const RECEIPT_SCHEMA = {
     },
     tax: { type: 'number', description: 'Sales tax on its own line; 0 if the receipt has no separate tax line' },
     shipping: { type: 'number', description: 'Shipping/delivery charge on its own line; 0 if none' },
+    discount: {
+      type: 'number',
+      description: 'Discount/coupon/promo deducted from the subtotal, as a positive number (e.g. a $10 discount is 10, not -10); 0 if none',
+    },
   },
-  required: ['vendor', 'date', 'items', 'tax', 'shipping'],
+  required: ['vendor', 'date', 'items', 'tax', 'shipping', 'discount'],
   additionalProperties: false,
 }
 
@@ -33,17 +37,19 @@ const ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, 'application/pdf']
 const MAX_BYTES = 10 * 1024 * 1024
 const MAX_FILES = 6
 
-// Splits tax/shipping across items by each item's share of the subtotal, in integer
-// cents so the allocated amounts always sum exactly back to itemsTotal + extraCents
-// (remainder lands on the last item rather than drifting from float rounding).
-function allocateExtraCharges(items, extraCents) {
+// Splits tax/shipping/discount across items by each item's share of the subtotal, in
+// integer cents so the allocated amounts always sum exactly back to
+// itemsTotal + adjustmentCents (remainder lands on the last item rather than drifting
+// from float rounding). adjustmentCents can be negative — a discount that outweighs
+// tax/shipping nets out to a reduction, not just an addition.
+function allocateAdjustment(items, adjustmentCents) {
   const subtotalCents = items.reduce((sum, it) => sum + Math.round(it.amount * 100), 0)
-  if (extraCents <= 0 || subtotalCents <= 0) return items
+  if (adjustmentCents === 0 || subtotalCents <= 0) return items
   let allocated = 0
   return items.map((it, i) => {
     const itemCents = Math.round(it.amount * 100)
     const isLast = i === items.length - 1
-    const shareCents = isLast ? extraCents - allocated : Math.round((itemCents / subtotalCents) * extraCents)
+    const shareCents = isLast ? adjustmentCents - allocated : Math.round((itemCents / subtotalCents) * adjustmentCents)
     allocated += shareCents
     return { description: it.description, amount: (itemCents + shareCents) / 100 }
   })
@@ -101,7 +107,7 @@ export async function POST(request) {
             ...fileBlocks,
             {
               type: 'text',
-              text: "These are one or more photos or PDFs of a single receipt for a freelance photographer/videographer's tax records (e.g. a long receipt photographed in multiple parts, a multi-page PDF invoice, or just one file — treat everything together as one receipt, don't double-count anything visible in more than one file). Extract the vendor name, purchase date, and every individual line item with its own price — list every item that appears; do not skip, merge, or summarize multiple items into one. For each item's description, write a short summarized name (a few words — e.g. \"NiSi Magnetic Filter Kit\", not the full verbose product title with every spec in parentheses). Separately: if sales tax is broken out as its own line, put that amount in the \"tax\" field (0 if there's no separate tax line). If there's a separate shipping/delivery charge, put that in the \"shipping\" field (0 if none). Do not include tax, shipping, the subtotal, or the grand total as one of the items — items should only be the actual products/services purchased. If the receipt only shows one total with no itemized breakdown, return a single item using the total amount and a short description of what was purchased, with tax and shipping left as 0. Leave vendor or date as an empty string if illegible.",
+              text: "These are one or more photos or PDFs of a single receipt for a freelance photographer/videographer's tax records (e.g. a long receipt photographed in multiple parts, a multi-page PDF invoice, or just one file — treat everything together as one receipt, don't double-count anything visible in more than one file). Extract the vendor name, purchase date, and every individual line item with its own price — list every item that appears; do not skip, merge, or summarize multiple items into one. For each item's description, write a short summarized name (a few words — e.g. \"NiSi Magnetic Filter Kit\", not the full verbose product title with every spec in parentheses). Separately: if sales tax is broken out as its own line, put that amount in the \"tax\" field (0 if there's no separate tax line). If there's a separate shipping/delivery charge, put that in the \"shipping\" field (0 if none). If there's a discount, coupon, promo code, or \"cart discount\" line reducing the total, put that amount in the \"discount\" field as a positive number (0 if none) — check carefully for this, it's easy to miss. Do not include tax, shipping, discount, the subtotal, or the grand total as one of the items — items should only be the actual products/services purchased. Before finalizing, verify: sum(item prices) + tax + shipping - discount should equal the receipt's printed grand total — if it doesn't, re-check the receipt for a discount/coupon line you may have missed. If the receipt only shows one total with no itemized breakdown, return a single item using the total amount and a short description of what was purchased, with tax/shipping/discount left as 0. Leave vendor or date as an empty string if illegible.",
             },
           ],
         },
@@ -120,7 +126,9 @@ export async function POST(request) {
 
     const taxCents = Number.isFinite(parsed.tax) ? Math.round(parsed.tax * 100) : 0
     const shippingCents = Number.isFinite(parsed.shipping) ? Math.round(parsed.shipping * 100) : 0
-    const items = allocateExtraCharges(rawItems, Math.max(taxCents, 0) + Math.max(shippingCents, 0))
+    const discountCents = Number.isFinite(parsed.discount) ? Math.round(parsed.discount * 100) : 0
+    const adjustmentCents = Math.max(taxCents, 0) + Math.max(shippingCents, 0) - Math.max(discountCents, 0)
+    const items = allocateAdjustment(rawItems, adjustmentCents)
 
     return NextResponse.json({
       vendor: parsed.vendor ? String(parsed.vendor).slice(0, 200) : '',
