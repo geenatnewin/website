@@ -8,11 +8,12 @@ export const PAYMENT_METHODS = [
   'Cash',
 ]
 
+// chartColor matches the .ldg-type-* badge colors already used on gig entries.
 export const GIG_TYPES = [
-  { value: 'photography', label: 'Photography' },
-  { value: 'videography', label: 'Videography' },
-  { value: 'dj', label: 'DJ' },
-  { value: 'other', label: 'Other' },
+  { value: 'photography', label: 'Photography', chartColor: 'blue' },
+  { value: 'videography', label: 'Videography', chartColor: 'violet' },
+  { value: 'dj', label: 'DJ', chartColor: 'orange' },
+  { value: 'other', label: 'Other', chartColor: 'muted' },
 ]
 
 // Maps 1:1 to Schedule C Part II expense lines.

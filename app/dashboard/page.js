@@ -4,12 +4,10 @@ import { getGigs, getExpenses, getRecentGigsForDropdown } from './db'
 import { addGig, editGig, removeGig, addExpense, editExpense, removeExpense, logout } from './actions'
 import { mileageDeduction } from './mileage'
 import { formatMoney } from './format'
-import AddForms from './AddForms'
+import DashboardSections from './DashboardSections'
 import RevealAmount from './RevealAmount'
 import LedgerShell from './LedgerShell'
 import RemindersBanner from './RemindersBanner'
-import GigEntry from './GigEntry'
-import ExpenseLine from './ExpenseLine'
 
 export const metadata = { title: 'Ledger' }
 
@@ -64,41 +62,18 @@ export default async function LedgerDashboard() {
         </div>
       </section>
 
-      <AddForms addGig={addGig} addExpense={addExpense} recentGigs={recentGigs} />
-
-      <section className="ldg-card ldg-list">
-        <p className="ldg-card-title">Gigs</p>
-        {gigs.length === 0 && <p className="ldg-empty">No gigs logged yet.</p>}
-        {gigs.map((g, i) => (
-          <GigEntry
-            key={g.id}
-            gig={g}
-            displayNum={String(gigs.length - i).padStart(3, '0')}
-            expenses={expensesByGig[g.id] || []}
-            editGig={editGig}
-            removeGig={removeGig}
-            editExpense={editExpense}
-            removeExpense={removeExpense}
-            recentGigs={recentGigs}
-          />
-        ))}
-      </section>
-
-      {generalExpenses.length > 0 && (
-        <section className="ldg-card ldg-list">
-          <p className="ldg-card-title">General expenses</p>
-          {generalExpenses.map((e) => (
-            <ExpenseLine
-              key={e.id}
-              expense={e}
-              showDate
-              editExpense={editExpense}
-              removeExpense={removeExpense}
-              recentGigs={recentGigs}
-            />
-          ))}
-        </section>
-      )}
+      <DashboardSections
+        gigs={gigs}
+        expensesByGig={expensesByGig}
+        generalExpenses={generalExpenses}
+        addGig={addGig}
+        editGig={editGig}
+        removeGig={removeGig}
+        addExpense={addExpense}
+        editExpense={editExpense}
+        removeExpense={removeExpense}
+        recentGigs={recentGigs}
+      />
     </LedgerShell>
   )
 }

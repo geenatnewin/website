@@ -1,3 +1,6 @@
+import { mileageDeduction } from './mileage'
+import { deductibleAmount } from './categories'
+
 function quarterlyDeadlinesForYear(year) {
   return [
     { label: `Q1 ${year}`, due: new Date(`${year}-04-15T00:00:00`) },
@@ -17,6 +20,30 @@ export function daysUntil(date, today = new Date()) {
   return Math.ceil((date - today) / (1000 * 60 * 60 * 24))
 }
 
+// Year-to-date net profit — the base a quarterly estimated-tax "set aside" figure is built on.
+// A flat rate is deliberately used instead of computing real SE-tax/income-tax brackets — those
+// depend on filing status, other income, and deductions this app doesn't know. 27% is the
+// midpoint of the common 25-30% self-employed rule of thumb; the caller can override it.
+export function ytdNetProfit(gigs, expenses, today = new Date()) {
+  const yearStart = new Date(today.getFullYear(), 0, 1)
+
+  const ytdGigs = gigs.filter((g) => {
+    const d = new Date(g.gig_date)
+    return d >= yearStart && d <= today
+  })
+  const ytdExpenseRows = expenses.filter((e) => {
+    const d = new Date(e.expense_date)
+    return d >= yearStart && d <= today
+  })
+
+  const ytdIncome = ytdGigs.reduce((s, g) => s + Number(g.gross_payment), 0)
+  const ytdMileageDeduction = ytdGigs.reduce((s, g) => s + mileageDeduction(g.gig_date, g.mileage), 0)
+  const ytdExpenseDeductions = ytdExpenseRows.reduce((s, e) => s + deductibleAmount(e.category, e.amount, e.meta), 0)
+  const ytdExpenses = ytdExpenseDeductions + ytdMileageDeduction
+
+  return { ytdIncome, ytdExpenses, netProfit: ytdIncome - ytdExpenses }
+}
+
 // Contractors you've PAID $600+ to (you may owe them a 1099-NEC) — distinct from the
 // client-side $600+ tracker on the report page, which is about 1099s YOU might receive.
 export function contractorsOwed1099(expenses) {
@@ -28,6 +55,34 @@ export function contractorsOwed1099(expenses) {
   return Object.entries(byVendor)
     .filter(([, total]) => total >= 600)
     .sort((a, b) => b[1] - a[1])
+}
+
+// Vendors ever flagged "recurring monthly" that have gone 2+ months with nothing logged —
+// checking both the current and prior month avoids a false alarm early in the month before
+// this cycle's charge would normally show up.
+export function missingRecurringExpenses(expenses, today = new Date()) {
+  const recurringVendors = new Set()
+  for (const e of expenses) {
+    if (e.recurring_monthly && e.vendor) recurringVendors.add(e.vendor)
+  }
+
+  const monthKey = (date) => `${date.getFullYear()}-${date.getMonth()}`
+  const currentMonthKey = monthKey(today)
+  const lastMonthKey = monthKey(new Date(today.getFullYear(), today.getMonth() - 1, 1))
+
+  const loggedMonthsByVendor = {}
+  for (const e of expenses) {
+    if (!e.vendor || !recurringVendors.has(e.vendor)) continue
+    const key = monthKey(new Date(e.expense_date))
+    ;(loggedMonthsByVendor[e.vendor] ??= new Set()).add(key)
+  }
+
+  return [...recurringVendors]
+    .filter((vendor) => {
+      const logged = loggedMonthsByVendor[vendor] || new Set()
+      return !logged.has(currentMonthKey) && !logged.has(lastMonthKey)
+    })
+    .sort()
 }
 
 export function stalePendingGigs(gigs, staleDays = 14, today = new Date()) {

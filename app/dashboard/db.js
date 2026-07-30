@@ -67,14 +67,14 @@ export async function deleteGig(id) {
   await sql`DELETE FROM gigs WHERE id = ${id}`
 }
 
-export async function insertExpense({ gigId, expenseDate, category, description, amount, vendor, meta }) {
+export async function insertExpense({ gigId, expenseDate, category, description, amount, vendor, meta, receiptUrl, recurringMonthly }) {
   await sql`
-    INSERT INTO expenses (gig_id, expense_date, category, description, amount, vendor, meta)
-    VALUES (${gigId || null}, ${expenseDate}, ${category}, ${description || null}, ${amount}, ${vendor || null}, ${JSON.stringify(meta || {})}::jsonb)
+    INSERT INTO expenses (gig_id, expense_date, category, description, amount, vendor, meta, receipt_url, recurring_monthly)
+    VALUES (${gigId || null}, ${expenseDate}, ${category}, ${description || null}, ${amount}, ${vendor || null}, ${JSON.stringify(meta || {})}::jsonb, ${receiptUrl || null}, ${Boolean(recurringMonthly)})
   `
 }
 
-export async function updateExpense(id, { gigId, expenseDate, category, description, amount, vendor, meta }) {
+export async function updateExpense(id, { gigId, expenseDate, category, description, amount, vendor, meta, receiptUrl, recurringMonthly }) {
   await sql`
     UPDATE expenses SET
       gig_id = ${gigId || null},
@@ -83,7 +83,9 @@ export async function updateExpense(id, { gigId, expenseDate, category, descript
       description = ${description || null},
       amount = ${amount},
       vendor = ${vendor || null},
-      meta = ${JSON.stringify(meta || {})}::jsonb
+      meta = ${JSON.stringify(meta || {})}::jsonb,
+      receipt_url = COALESCE(${receiptUrl || null}, receipt_url),
+      recurring_monthly = ${Boolean(recurringMonthly)}
     WHERE id = ${id}
   `
 }

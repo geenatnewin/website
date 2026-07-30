@@ -43,9 +43,15 @@ await sql`
     amount NUMERIC(10,2) NOT NULL,
     vendor TEXT,
     meta JSONB DEFAULT '{}'::jsonb,
+    receipt_url TEXT,
+    recurring_monthly BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
   )
 `
+
+// Idempotent — covers databases created before these columns existed.
+await sql`ALTER TABLE expenses ADD COLUMN IF NOT EXISTS receipt_url TEXT`
+await sql`ALTER TABLE expenses ADD COLUMN IF NOT EXISTS recurring_monthly BOOLEAN NOT NULL DEFAULT false`
 
 await sql`
   CREATE TABLE IF NOT EXISTS login_security (

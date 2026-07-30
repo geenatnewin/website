@@ -3,17 +3,23 @@ export const dynamic = 'force-dynamic'
 import { getGigs, getExpenses } from '../db'
 import { logout } from '../actions'
 import { mileageDeduction } from '../mileage'
-import { EXPENSE_CATEGORIES, MILEAGE_CHART_COLOR, deductibleAmount } from '../categories'
+import { EXPENSE_CATEGORIES, GIG_TYPES, MILEAGE_CHART_COLOR, deductibleAmount } from '../categories'
 import { formatMoney } from '../format'
 import LedgerShell from '../LedgerShell'
 import PrintButton from './PrintButton'
 import CategoryDonut from './CategoryDonut'
 import QuarterBars from './QuarterBars'
 
-export const metadata = { title: 'Ledger — Report' }
+export const metadata = { title: 'Ledger — Overview' }
+
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 function quarterIndex(dateInput) {
   return Math.floor(new Date(dateInput).getMonth() / 3)
+}
+
+function monthIndex(dateInput) {
+  return new Date(dateInput).getMonth()
 }
 
 export default async function LedgerReport() {
@@ -74,14 +80,35 @@ export default async function LedgerReport() {
 
   const currentQuarter = quarterIndex(new Date())
 
+  const byGigType = {}
+  for (const t of GIG_TYPES) byGigType[t.value] = 0
+  for (const g of gigs) {
+    byGigType[g.gig_type] = (byGigType[g.gig_type] || 0) + Number(g.gross_payment)
+  }
+  const gigTypeSegments = GIG_TYPES.filter((t) => byGigType[t.value] > 0)
+    .map((t) => ({ label: t.label, value: byGigType[t.value], color: t.chartColor }))
+    .sort((a, b) => b.value - a.value)
+
+  const months = MONTH_LABELS.map((label) => ({ label, income: 0, expenses: 0 }))
+  for (const g of gigs) {
+    const mi = monthIndex(g.gig_date)
+    months[mi].income += Number(g.gross_payment)
+    months[mi].expenses += mileageDeduction(g.gig_date, g.mileage)
+  }
+  for (const e of expenses) {
+    const mi = monthIndex(e.expense_date)
+    months[mi].expenses += deductibleAmount(e.category, e.amount, e.meta)
+  }
+  const currentMonth = new Date().getMonth()
+
   return (
     <LedgerShell active="report" logout={logout}>
       <div className="ldg-report-header ldg-no-print">
-        <h1 className="ldg-page-title">Report</h1>
+        <h1 className="ldg-page-title">Overview</h1>
         <PrintButton />
       </div>
 
-      <section className="ldg-report-grid">
+      <section className="ldg-report-grid ldg-no-print">
         <div className="ldg-card">
           <p className="ldg-card-title">Expenses by category</p>
           <CategoryDonut segments={donutSegments} />
@@ -90,6 +117,16 @@ export default async function LedgerReport() {
         <div className="ldg-card">
           <p className="ldg-card-title">Net by quarter</p>
           <QuarterBars quarters={quarters} currentIndex={currentQuarter} />
+        </div>
+
+        <div className="ldg-card">
+          <p className="ldg-card-title">Income by gig type</p>
+          <CategoryDonut segments={gigTypeSegments} />
+        </div>
+
+        <div className="ldg-card">
+          <p className="ldg-card-title">Net by month</p>
+          <QuarterBars quarters={months} currentIndex={currentMonth} />
         </div>
       </section>
 

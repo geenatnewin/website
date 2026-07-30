@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { EXPENSE_CATEGORIES, categoryConfig } from './categories'
 
 function toDateInput(value) {
@@ -16,6 +16,7 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
   const isInsurance = expenseCategory === 'insurance'
   const isMealsBulk = !isEdit && expenseCategory === 'meals'
   const isSuppliesBulk = !isEdit && expenseCategory === 'supplies'
+  const showReceiptUpload = expenseCategory === 'supplies' || expenseCategory === 'meals'
 
   const [billingFrequency, setBillingFrequency] = useState(initial?.meta?.billingFrequency || 'Monthly')
 
@@ -39,6 +40,55 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
   }
   function removeSupplyRow(index) {
     setSupplyRows((rows) => rows.filter((_, i) => i !== index))
+  }
+
+  const vendorRef = useRef(null)
+  const expenseDateRef = useRef(null)
+  const amountRef = useRef(null)
+  const extraFieldRefs = useRef({})
+  const [receiptKey, setReceiptKey] = useState(initial?.receipt_url || '')
+  const [receiptPreview, setReceiptPreview] = useState(null)
+  const [analyzing, setAnalyzing] = useState(false)
+  const [analyzeError, setAnalyzeError] = useState('')
+
+  async function handleReceiptChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setReceiptPreview(URL.createObjectURL(file))
+    setAnalyzing(true)
+    setAnalyzeError('')
+    try {
+      const body = new FormData()
+      body.append('receipt', file)
+      const res = await fetch('/api/ledger/analyze-receipt', { method: 'POST', body })
+      const data = await res.json()
+      if (data.receiptKey) setReceiptKey(data.receiptKey)
+      if (!res.ok) throw new Error(data.error || 'Could not read the receipt')
+
+      if (data.vendor && vendorRef.current) vendorRef.current.value = data.vendor
+      if (data.date && expenseDateRef.current) expenseDateRef.current.value = data.date
+
+      if (isSuppliesBulk && data.items?.length) {
+        setSupplyRows(data.items.map((it) => ({ item: it.description, amount: String(it.amount), capitalAsset: false })))
+      } else if (isMealsBulk && data.items?.length) {
+        // A receipt is one meal transaction, even if it itemizes several food items —
+        // sum them into a single meal row rather than splitting into separate expenses.
+        const total = data.items.reduce((sum, it) => sum + it.amount, 0)
+        setMealRows((rows) => {
+          const updated = [...rows]
+          updated[0] = { vendor: data.vendor || updated[0].vendor, amount: String(total) }
+          return updated
+        })
+      } else if (!isSuppliesBulk && !isMealsBulk && data.items?.length) {
+        const first = data.items[0]
+        if (amountRef.current) amountRef.current.value = String(first.amount)
+        if (extraFieldRefs.current.item) extraFieldRefs.current.item.value = first.description
+      }
+    } catch (err) {
+      setAnalyzeError(err.message)
+    } finally {
+      setAnalyzing(false)
+    }
   }
 
   return (
@@ -67,6 +117,7 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
             type="date"
             id="expenseDate"
             name="expenseDate"
+            ref={expenseDateRef}
             defaultValue={toDateInput(initial?.expense_date)}
             onClick={(e) => e.target.showPicker?.()}
             required
@@ -85,6 +136,29 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
           ))}
         </select>
       </div>
+
+      {showReceiptUpload && (
+        <div className="ldg-field">
+          <label htmlFor="receiptPhoto">Receipt Photo (optional)</label>
+          <input
+            type="file"
+            id="receiptPhoto"
+            accept="image/*"
+            capture="environment"
+            onChange={handleReceiptChange}
+          />
+          {receiptPreview && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={receiptPreview} alt="Receipt preview" className="ldg-receipt-preview" />
+          )}
+          {analyzing && <p className="ldg-hint">Reading receipt…</p>}
+          {analyzeError && <p className="ldg-hint ldg-hint-error">{analyzeError}</p>}
+          {receiptKey && !analyzing && (
+            <p className="ldg-hint">✓ Receipt attached — double-check the fields below before submitting.</p>
+          )}
+          <input type="hidden" name="receiptKey" value={receiptKey} readOnly />
+        </div>
+      )}
 
       {isMealsBulk ? (
         <div className="ldg-field">
@@ -127,7 +201,7 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
         <>
           <div className="ldg-field">
             <label htmlFor="vendor">{expenseCategoryConfig?.vendorLabel || 'Vendor'}</label>
-            <input type="text" id="vendor" name="vendor" defaultValue={initial?.vendor || ''} />
+            <input type="text" id="vendor" name="vendor" ref={vendorRef} defaultValue={initial?.vendor || ''} />
           </div>
 
           <div className="ldg-field">
@@ -185,13 +259,18 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
         <>
           <div className="ldg-field">
             <label htmlFor="amount">Amount ($)</label>
-            <input type="number" step="0.01" min="0" id="amount" name="amount" defaultValue={initial?.amount ?? ''} required />
+            <input type="number" step="0.01" min="0" id="amount" name="amount" ref={amountRef} defaultValue={initial?.amount ?? ''} required />
           </div>
 
           <div className="ldg-field">
             <label htmlFor="vendor">{expenseCategoryConfig?.vendorLabel || 'Vendor'}</label>
-            <input type="text" id="vendor" name="vendor" defaultValue={initial?.vendor || ''} />
+            <input type="text" id="vendor" name="vendor" ref={vendorRef} defaultValue={initial?.vendor || ''} />
           </div>
+
+          <label className="ldg-checkbox-field">
+            <input type="checkbox" name="recurringMonthly" value="true" defaultChecked={Boolean(initial?.recurring_monthly)} />
+            Recurring monthly expense (e.g. a software subscription)
+          </label>
         </>
       )}
 
@@ -277,6 +356,7 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
                 type={field.type || 'text'}
                 id={field.name}
                 name={field.name}
+                ref={(el) => { extraFieldRefs.current[field.name] = el }}
                 placeholder={field.placeholder}
                 defaultValue={fieldDefault}
                 required={field.required}

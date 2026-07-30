@@ -1,4 +1,4 @@
-import { nextQuarterlyDeadline, daysUntil, contractorsOwed1099, stalePendingGigs } from './taxTips'
+import { nextQuarterlyDeadline, daysUntil, contractorsOwed1099, stalePendingGigs, missingRecurringExpenses } from './taxTips'
 import { formatMoney } from './format'
 
 export default function RemindersBanner({ gigs, expenses }) {
@@ -6,6 +6,7 @@ export default function RemindersBanner({ gigs, expenses }) {
   const days = daysUntil(deadline.due)
   const contractors = contractorsOwed1099(expenses)
   const pending = stalePendingGigs(gigs)
+  const missingRecurring = missingRecurringExpenses(expenses)
 
   return (
     <section className="ldg-card ldg-reminders">
@@ -42,6 +43,23 @@ export default function RemindersBanner({ gigs, expenses }) {
           <span>
             {pending.length} gig{pending.length === 1 ? ' is' : 's are'} still marked <strong>pending</strong> from
             2+ weeks ago — worth checking if payment came through.
+          </span>
+        </div>
+      )}
+
+      {missingRecurring.length > 0 && (
+        <div className="ldg-reminder-row ldg-reminder-warning">
+          <span className="ldg-reminder-icon">🔁</span>
+          <span>
+            No charge logged for{' '}
+            {missingRecurring.map((vendor, i) => (
+              <span key={vendor}>
+                {i > 0 && ', '}
+                <strong>{vendor}</strong>
+              </span>
+            ))}{' '}
+            in the last 2 months, though {missingRecurring.length === 1 ? "it's" : "they're"} marked recurring —
+            did you forget to log {missingRecurring.length === 1 ? 'it' : 'them'}, or cancel?
           </span>
         </div>
       )}

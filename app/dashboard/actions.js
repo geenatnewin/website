@@ -122,6 +122,8 @@ function expenseFieldsFromFormData(formData) {
     amount: formData.get('amount'),
     vendor: formData.get('vendor'),
     meta,
+    receiptUrl: formData.get('receiptKey') || null,
+    recurringMonthly: formData.get('recurringMonthly') === 'true',
   }
 }
 
@@ -155,6 +157,7 @@ export async function addExpense(formData) {
     const vendor = formData.get('vendor')
     const supplyItems = formData.getAll('supplyItem')
     const supplyCapitalFlags = formData.getAll('supplyCapitalAsset')
+    const receiptUrl = formData.get('receiptKey') || null
 
     for (let i = 0; i < supplyAmounts.length; i++) {
       if (!supplyAmounts[i]) continue
@@ -169,6 +172,7 @@ export async function addExpense(formData) {
         amount: supplyAmounts[i],
         vendor,
         meta,
+        receiptUrl,
       })
     }
   } else {

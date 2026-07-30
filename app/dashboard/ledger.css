@@ -72,7 +72,10 @@
   margin: 0 auto;
   border-radius: 22px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  box-shadow:
+    0 0 120px rgba(155, 59, 209, 0.16),
+    0 0 90px rgba(47, 124, 246, 0.12),
+    0 20px 60px rgba(0,0,0,0.4);
   border: 1px solid var(--border);
 }
 
@@ -80,7 +83,9 @@
 .ldg-sidebar {
   width: 220px;
   flex-shrink: 0;
-  background: var(--sidebar);
+  background:
+    radial-gradient(ellipse 260px 200px at 0% 100%, rgba(224, 71, 158, 0.10), transparent 65%),
+    linear-gradient(180deg, #150f20, #0c0a12);
   padding: 1.75rem 1.25rem;
   display: flex;
   flex-direction: column;
@@ -122,6 +127,7 @@
 .ldg-sidebar-link-active {
   background: var(--grad-1);
   color: #fff;
+  box-shadow: 0 0 20px rgba(155, 59, 209, 0.55), 0 4px 14px rgba(155, 59, 209, 0.3);
 }
 .ldg-sidebar-link-active:hover { background: var(--grad-1); color: #fff; }
 .ldg-sidebar-logout { margin-top: auto; }
@@ -132,7 +138,10 @@
 .ldg-main {
   flex: 1;
   min-width: 0;
-  background: var(--main);
+  background:
+    radial-gradient(ellipse 520px 320px at 100% 0%, rgba(47, 124, 246, 0.10), transparent 60%),
+    radial-gradient(ellipse 460px 300px at 0% 100%, rgba(23, 201, 201, 0.08), transparent 60%),
+    var(--main);
   padding: 2rem 2.25rem 2.5rem;
 }
 
@@ -176,11 +185,11 @@
   font-weight: 700;
 }
 .ldg-stat-card strong { font-size: 1.55rem; font-weight: 800; }
-.ldg-stat-grad-1 { background: var(--grad-1); }
-.ldg-stat-grad-2 { background: var(--grad-2); }
-.ldg-stat-grad-3 { background: var(--grad-3); }
-.ldg-stat-grad-good { background: var(--grad-good); }
-.ldg-stat-grad-critical { background: var(--grad-critical); }
+.ldg-stat-grad-1 { background: var(--grad-1); box-shadow: 0 10px 32px rgba(155, 59, 209, 0.45), 0 8px 24px rgba(0,0,0,0.25); }
+.ldg-stat-grad-2 { background: var(--grad-2); box-shadow: 0 10px 32px rgba(47, 124, 246, 0.4), 0 8px 24px rgba(0,0,0,0.25); }
+.ldg-stat-grad-3 { background: var(--grad-3); box-shadow: 0 10px 32px rgba(23, 201, 201, 0.4), 0 8px 24px rgba(0,0,0,0.25); }
+.ldg-stat-grad-good { background: var(--grad-good); box-shadow: 0 10px 32px rgba(34, 209, 126, 0.4), 0 8px 24px rgba(0,0,0,0.25); }
+.ldg-stat-grad-critical { background: var(--grad-critical); box-shadow: 0 10px 32px rgba(240, 82, 95, 0.4), 0 8px 24px rgba(0,0,0,0.25); }
 
 /* ── CENSORED AMOUNTS (click to reveal) ── */
 .ldg-censored,
@@ -227,7 +236,7 @@
 
 /* ── GENERIC CARD ── */
 .ldg-card {
-  background: var(--card);
+  background: linear-gradient(155deg, #261f36 0%, #1d1829 100%);
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1.5rem 1.6rem;
@@ -245,13 +254,15 @@
 /* ── ADD BUTTONS / FORMS ── */
 .ldg-add-section { margin-bottom: 1.5rem; }
 .ldg-add-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+.ldg-box-add { display: flex; flex-direction: column; align-items: center; margin-bottom: 1.75rem; }
+.ldg-box-add .ldg-form { width: 100%; }
 .ldg-form {
   margin-top: 1.25rem;
   padding: 1.5rem 1.6rem;
   display: flex;
   flex-direction: column;
   gap: 1.1rem;
-  background: var(--card);
+  background: linear-gradient(155deg, #261f36 0%, #1d1829 100%);
   border: 1px solid var(--border);
   border-radius: 16px;
   max-width: 480px;
@@ -291,6 +302,14 @@
 .ldg-hint { font-size: 0.72rem; color: var(--text-muted); margin-top: -0.2rem; }
 .ldg-hint-error { color: var(--critical); }
 .ldg-hint-warning { color: var(--warning); }
+
+.ldg-receipt-preview {
+  max-width: 160px;
+  max-height: 160px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  object-fit: cover;
+}
 
 .ldg-checkbox-field {
   display: flex;
@@ -332,14 +351,17 @@
   border-radius: 999px;
   color: #fff;
   background: var(--card-alt);
-  transition: opacity 0.15s, transform 0.1s;
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.2s;
 }
 .ldg-btn:hover { opacity: 0.88; }
 .ldg-btn:active { transform: scale(0.98); }
-.ldg-btn-gig { background: var(--grad-1); }
-.ldg-btn-expense { background: var(--grad-2); }
-.ldg-btn-active { background: var(--card-alt); }
-.ldg-btn-submit { background: var(--grad-good); margin-top: 0.25rem; }
+.ldg-btn-gig { background: var(--grad-1); box-shadow: 0 4px 18px rgba(155, 59, 209, 0.35); }
+.ldg-btn-gig:hover { box-shadow: 0 6px 24px rgba(155, 59, 209, 0.55); }
+.ldg-btn-expense { background: var(--grad-2); box-shadow: 0 4px 18px rgba(47, 124, 246, 0.35); }
+.ldg-btn-expense:hover { box-shadow: 0 6px 24px rgba(47, 124, 246, 0.55); }
+.ldg-btn-active { background: var(--card-alt); box-shadow: none; }
+.ldg-btn-submit { background: var(--grad-good); margin-top: 0.25rem; box-shadow: 0 4px 18px rgba(34, 209, 126, 0.35); }
+.ldg-btn-submit:hover { box-shadow: 0 6px 24px rgba(34, 209, 126, 0.55); }
 
 .ldg-toast {
   position: fixed;
@@ -355,7 +377,7 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   border-radius: 999px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 28px rgba(34, 209, 126, 0.55), 0 8px 24px rgba(0, 0, 0, 0.35);
   pointer-events: none;
   animation: ldg-toast-fade 1.8s ease forwards;
 }
@@ -393,7 +415,7 @@
 .ldg-entry {
   padding: 1rem 1.1rem;
   margin-bottom: 0.6rem;
-  background: var(--card-alt);
+  background: linear-gradient(155deg, #2c2340 0%, #221c31 100%);
   border-radius: 12px;
   border-left: 4px solid var(--chart-muted);
 }
@@ -472,11 +494,11 @@
   width: 100%;
   max-width: 320px;
   text-align: center;
-  background: var(--card);
+  background: linear-gradient(155deg, #261f36 0%, #1d1829 100%);
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 2.5rem 2rem;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  box-shadow: 0 0 100px rgba(155, 59, 209, 0.14), 0 20px 60px rgba(0,0,0,0.4);
 }
 .ldg-login-box .ldg-brand { font-size: 1.1rem; font-weight: 700; }
 .ldg-login-form { display: flex; flex-direction: column; gap: 0.9rem; margin-top: 1.5rem; text-align: left; }
@@ -553,7 +575,7 @@
 
 /* ── DONUT CHART ── */
 .ldg-donut-wrap { display: flex; align-items: center; gap: 1.75rem; flex-wrap: wrap; }
-.ldg-donut { width: 160px; height: 160px; flex-shrink: 0; }
+.ldg-donut { width: 160px; height: 160px; flex-shrink: 0; filter: drop-shadow(0 0 16px rgba(155, 59, 209, 0.3)); }
 .ldg-donut-legend { list-style: none; display: flex; flex-direction: column; gap: 0.55rem; font-size: 0.82rem; }
 .ldg-donut-legend li { display: flex; align-items: center; color: var(--text-secondary); }
 .ldg-legend-value { margin-left: 0.6rem; font-weight: 600; color: var(--text-primary); }
@@ -563,7 +585,7 @@
 .ldg-bar-zeroline { stroke: var(--gridline); stroke-width: 1; }
 .ldg-bar-good { fill: var(--good); }
 .ldg-bar-critical { fill: var(--critical); }
-.ldg-bar-current { stroke: #fff; stroke-width: 2; }
+.ldg-bar-current { stroke: #fff; stroke-width: 2; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.55)); }
 .ldg-bar-label { fill: var(--text-secondary); font-size: 11px; font-family: inherit; }
 .ldg-bar-value { fill: var(--text-primary); font-size: 10px; font-weight: 600; font-family: inherit; }
 
@@ -606,12 +628,24 @@
 }
 
 /* ── PRINT (report page) ── */
+@page { margin: 0.5in; }
 @media print {
   .ldg-root { position: static; overflow: visible; background: #fff; color: #000; }
   .ldg-page-bg { padding: 0; background: none; }
   .ldg-shell { box-shadow: none; border: none; }
   .ldg-sidebar { display: none; }
   .ldg-no-print { display: none !important; }
-  .ldg-card { border: 1px solid #ccc; break-inside: avoid; background: #fff; color: #000; }
-  .ldg-report-row { color: #000; border-color: #ddd; }
+  .ldg-card {
+    border: 1px solid #ccc;
+    background: #fff;
+    color: #000;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .ldg-report-row {
+    color: #000;
+    border-color: #ddd;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 }
