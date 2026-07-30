@@ -290,9 +290,26 @@
 .ldg-field textarea { resize: vertical; min-height: 70px; }
 .ldg-hint { font-size: 0.72rem; color: var(--text-muted); margin-top: -0.2rem; }
 .ldg-hint-error { color: var(--critical); }
+.ldg-hint-warning { color: var(--warning); }
+
+.ldg-checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.ldg-checkbox-field input { width: auto; }
+.ldg-row-checkbox { flex: 0 0 auto; white-space: nowrap; }
 
 .ldg-inline-field { display: flex; gap: 0.5rem; }
 .ldg-inline-field input { flex: 1; min-width: 0; }
+
+.ldg-meal-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+.ldg-meal-row input { flex: 1; min-width: 0; }
+.ldg-meal-row .ldg-meal-amount { flex: 0 0 100px; }
+.ldg-meal-row .ldg-icon-btn { flex: 0 0 auto; }
 .ldg-btn-calc {
   align-self: stretch;
   padding: 0.65rem 1.1rem;
@@ -323,6 +340,52 @@
 .ldg-btn-expense { background: var(--grad-2); }
 .ldg-btn-active { background: var(--card-alt); }
 .ldg-btn-submit { background: var(--grad-good); margin-top: 0.25rem; }
+
+.ldg-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  padding: 0.6rem 1.4rem;
+  background: var(--good);
+  color: #0d0d0d;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  animation: ldg-toast-fade 1.8s ease forwards;
+}
+@keyframes ldg-toast-fade {
+  0% { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  12% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  78% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+}
+.ldg-btn-cancel { background: var(--card-alt); }
+.ldg-form-actions { display: flex; gap: 0.75rem; align-items: center; }
+
+.ldg-entry-controls { display: flex; gap: 0.3rem; margin-left: 0.5rem; }
+.ldg-entry-controls-sm { margin-left: 0.75rem; }
+.ldg-entry-controls form { display: inline; }
+.ldg-icon-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+.ldg-icon-btn:hover { background: var(--card-alt); color: var(--text-primary); }
+.ldg-icon-btn-danger:hover { background: var(--critical); color: #fff; }
 
 /* ── LISTS ── */
 .ldg-empty { color: var(--text-muted); font-size: 0.9rem; }
@@ -387,7 +450,7 @@
   padding: 0.35rem 0 0.35rem 1.1rem;
   border-left: 2px solid var(--gridline);
 }
-.ldg-expense-row span:last-child { margin-left: auto; font-weight: 600; color: var(--chart-orange); }
+.ldg-expense-amount { margin-left: auto; font-weight: 600; color: var(--chart-orange); }
 .ldg-expense-meta {
   font-size: 0.75rem;
   color: var(--text-muted);
@@ -533,8 +596,10 @@
   .ldg-add-buttons .ldg-btn { width: 100%; text-align: center; }
   .ldg-entry-head { gap: 0.6rem; }
   .ldg-entry-amount { margin-left: 0; width: 100%; order: 10; font-size: 1.1rem; }
+  .ldg-entry-controls { margin-left: 0; width: 100%; order: 11; }
   .ldg-expense-row { flex-wrap: wrap; row-gap: 0.15rem; }
-  .ldg-expense-row span:last-child { margin-left: 0; width: 100%; order: 10; }
+  .ldg-expense-amount { margin-left: 0; width: 100%; order: 10; }
+  .ldg-expense-row .ldg-entry-controls-sm { margin-left: 0; width: 100%; order: 11; }
   .ldg-donut-wrap { flex-direction: column; align-items: flex-start; }
   /* Prevent iOS auto-zoom on focus */
   .ldg-field input, .ldg-field select, .ldg-field textarea, .ldg-input { font-size: 16px; }

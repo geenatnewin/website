@@ -1,13 +1,14 @@
 export const dynamic = 'force-dynamic'
 
 import { getGigs, getExpenses, getRecentGigsForDropdown } from './db'
-import { addGig, addExpense, logout } from './actions'
-import { categoryLabel, metaSummary } from './categories'
+import { addGig, editGig, removeGig, addExpense, editExpense, removeExpense, logout } from './actions'
 import { mileageDeduction } from './mileage'
 import AddForms from './AddForms'
 import RevealAmount from './RevealAmount'
 import LedgerShell from './LedgerShell'
 import RemindersBanner from './RemindersBanner'
+import GigEntry from './GigEntry'
+import ExpenseLine from './ExpenseLine'
 
 export const metadata = { title: 'Ledger' }
 
@@ -68,36 +69,17 @@ export default async function LedgerDashboard() {
         <p className="ldg-card-title">Gigs</p>
         {gigs.length === 0 && <p className="ldg-empty">No gigs logged yet.</p>}
         {gigs.map((g, i) => (
-          <div className={`ldg-entry ldg-entry-${g.gig_type}`} key={g.id}>
-            <div className="ldg-entry-head">
-              <span className="ldg-entry-num">{String(gigs.length - i).padStart(3, '0')}</span>
-              <span className="ldg-entry-date">{new Date(g.gig_date).toLocaleDateString()}</span>
-              <span className="ldg-entry-client">{g.client}</span>
-              <span className={`ldg-entry-type ldg-type-${g.gig_type}`}>
-                {g.gig_type === 'other' && g.gig_type_other ? g.gig_type_other : g.gig_type}
-              </span>
-              <span className={`ldg-status ldg-status-${g.status}`}>{g.status}</span>
-              <span className="ldg-entry-amount">${Number(g.gross_payment).toFixed(2)}</span>
-            </div>
-            {Number(g.mileage) > 0 && (
-              <div className="ldg-entry-sub">
-                Mileage: {g.mileage} mi → ${mileageDeduction(g.gig_date, g.mileage).toFixed(2)} deduction (est.)
-              </div>
-            )}
-            {g.notes && <div className="ldg-entry-sub">{g.notes}</div>}
-            {(expensesByGig[g.id] || []).map((e) => (
-              <div key={e.id}>
-                <div className="ldg-expense-row">
-                  <span>{categoryLabel(e.category)}</span>
-                  <span>{e.vendor || '—'}</span>
-                  <span>${Number(e.amount).toFixed(2)}</span>
-                </div>
-                {metaSummary(e.category, e.meta) && (
-                  <div className="ldg-expense-meta">{metaSummary(e.category, e.meta)}</div>
-                )}
-              </div>
-            ))}
-          </div>
+          <GigEntry
+            key={g.id}
+            gig={g}
+            displayNum={String(gigs.length - i).padStart(3, '0')}
+            expenses={expensesByGig[g.id] || []}
+            editGig={editGig}
+            removeGig={removeGig}
+            editExpense={editExpense}
+            removeExpense={removeExpense}
+            recentGigs={recentGigs}
+          />
         ))}
       </section>
 
@@ -105,17 +87,14 @@ export default async function LedgerDashboard() {
         <section className="ldg-card ldg-list">
           <p className="ldg-card-title">General expenses</p>
           {generalExpenses.map((e) => (
-            <div key={e.id}>
-              <div className="ldg-expense-row">
-                <span>{new Date(e.expense_date).toLocaleDateString()}</span>
-                <span>{categoryLabel(e.category)}</span>
-                <span>{e.vendor || '—'}</span>
-                <span>${Number(e.amount).toFixed(2)}</span>
-              </div>
-              {metaSummary(e.category, e.meta) && (
-                <div className="ldg-expense-meta">{metaSummary(e.category, e.meta)}</div>
-              )}
-            </div>
+            <ExpenseLine
+              key={e.id}
+              expense={e}
+              showDate
+              editExpense={editExpense}
+              removeExpense={removeExpense}
+              recentGigs={recentGigs}
+            />
           ))}
         </section>
       )}

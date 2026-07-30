@@ -35,9 +35,59 @@ export async function insertGig({
   `
 }
 
+export async function updateGig(id, {
+  gigDate,
+  client,
+  gigType,
+  gigTypeOther,
+  grossPayment,
+  paymentMethod,
+  datePaid,
+  status,
+  mileage,
+  notes,
+}) {
+  await sql`
+    UPDATE gigs SET
+      gig_date = ${gigDate},
+      client = ${client},
+      gig_type = ${gigType},
+      gig_type_other = ${gigType === 'other' ? gigTypeOther || null : null},
+      gross_payment = ${grossPayment},
+      payment_method = ${paymentMethod || null},
+      date_paid = ${datePaid || null},
+      status = ${status},
+      mileage = ${mileage || 0},
+      notes = ${notes || null}
+    WHERE id = ${id}
+  `
+}
+
+export async function deleteGig(id) {
+  await sql`DELETE FROM gigs WHERE id = ${id}`
+}
+
 export async function insertExpense({ gigId, expenseDate, category, description, amount, vendor, meta }) {
   await sql`
     INSERT INTO expenses (gig_id, expense_date, category, description, amount, vendor, meta)
     VALUES (${gigId || null}, ${expenseDate}, ${category}, ${description || null}, ${amount}, ${vendor || null}, ${JSON.stringify(meta || {})}::jsonb)
   `
+}
+
+export async function updateExpense(id, { gigId, expenseDate, category, description, amount, vendor, meta }) {
+  await sql`
+    UPDATE expenses SET
+      gig_id = ${gigId || null},
+      expense_date = ${expenseDate},
+      category = ${category},
+      description = ${description || null},
+      amount = ${amount},
+      vendor = ${vendor || null},
+      meta = ${JSON.stringify(meta || {})}::jsonb
+    WHERE id = ${id}
+  `
+}
+
+export async function deleteExpense(id) {
+  await sql`DELETE FROM expenses WHERE id = ${id}`
 }
