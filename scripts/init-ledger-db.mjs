@@ -47,4 +47,22 @@ await sql`
   )
 `
 
+await sql`
+  CREATE TABLE IF NOT EXISTS login_security (
+    ip TEXT PRIMARY KEY,
+    failed_count INTEGER NOT NULL DEFAULT 0,
+    locked_until TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  )
+`
+
+await sql`
+  CREATE TABLE IF NOT EXISTS login_lockout_log (
+    id SERIAL PRIMARY KEY,
+    ip TEXT NOT NULL,
+    locked_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    locked_until TIMESTAMPTZ NOT NULL
+  )
+`
+
 console.log('Ledger tables ready.')

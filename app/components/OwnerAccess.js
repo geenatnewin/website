@@ -8,6 +8,7 @@ export default function OwnerAccess() {
   const [open, setOpen] = useState(false)
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
+  const [locked, setLocked] = useState(false)
   const [loading, setLoading] = useState(false)
   const wrapRef = useRef(null)
 
@@ -35,10 +36,15 @@ export default function OwnerAccess() {
       })
       if (res.ok) {
         window.location.href = '/ledger'
+        return
+      }
+      const data = await res.json().catch(() => ({}))
+      if (res.status === 429 || data.locked) {
+        setLocked(true)
       } else {
         setError(true)
-        setLoading(false)
       }
+      setLoading(false)
     } catch {
       setError(true)
       setLoading(false)
@@ -66,10 +72,12 @@ export default function OwnerAccess() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="password"
             autoFocus
+            disabled={locked}
             className="owner-access-input"
           />
-          <button type="submit" className="owner-access-go" disabled={loading} aria-label="Enter">→</button>
+          <button type="submit" className="owner-access-go" disabled={loading || locked} aria-label="Enter">→</button>
           {error && <span className="owner-access-error">wrong</span>}
+          {locked && <span className="owner-access-error">locked 10 min</span>}
         </form>
       )}
     </div>

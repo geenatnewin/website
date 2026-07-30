@@ -1,17 +1,31 @@
 'use server'
 
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { insertGig, insertExpense } from './db'
 import { computeSessionToken, LEDGER_COOKIE } from './token'
 import { categoryConfig } from './categories'
+import { getClientIP, checkLockout, recordFailedAttempt, recordSuccessfulLogin } from './security'
 
 export async function login(formData) {
+  const ip = getClientIP(headers())
+
+  const lockout = await checkLockout(ip)
+  if (lockout.locked) {
+    redirect('/ledger/login?locked=1')
+  }
+
   const password = formData.get('password')
   if (password !== process.env.LEDGER_PASSWORD) {
+    const result = await recordFailedAttempt(ip)
+    if (result.lockedOut) {
+      redirect('/ledger/login?locked=1')
+    }
     redirect('/ledger/login?error=1')
   }
+
+  await recordSuccessfulLogin(ip)
   const token = await computeSessionToken()
   cookies().set(LEDGER_COOKIE, token, {
     httpOnly: true,
