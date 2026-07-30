@@ -259,6 +259,19 @@
 .ldg-field textarea:focus { border-color: #2f7cf6; }
 .ldg-field textarea { resize: vertical; min-height: 70px; }
 .ldg-hint { font-size: 0.72rem; color: var(--text-muted); margin-top: -0.2rem; }
+.ldg-hint-error { color: var(--critical); }
+
+.ldg-inline-field { display: flex; gap: 0.5rem; }
+.ldg-inline-field input { flex: 1; min-width: 0; }
+.ldg-btn-calc {
+  align-self: stretch;
+  padding: 0.65rem 1.1rem;
+  font-size: 0.68rem;
+  background: var(--card-alt);
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.ldg-btn-calc:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .ldg-btn {
   align-self: flex-start;

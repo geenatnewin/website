@@ -8,6 +8,26 @@ export default function AddForms({ addGig, addExpense, recentGigs }) {
   const [gigType, setGigType] = useState('photography')
   const [paymentMethod, setPaymentMethod] = useState('Venmo')
   const isPaymentOther = paymentMethod === 'Other'
+  const [venueAddress, setVenueAddress] = useState('')
+  const [mileage, setMileage] = useState('')
+  const [calcStatus, setCalcStatus] = useState('idle') // idle | loading | error
+  const [calcError, setCalcError] = useState('')
+
+  async function calculateMileage() {
+    if (!venueAddress.trim()) return
+    setCalcStatus('loading')
+    setCalcError('')
+    try {
+      const res = await fetch(`/api/ledger/mileage?address=${encodeURIComponent(venueAddress)}`)
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Could not calculate mileage')
+      setMileage(String(data.miles))
+      setCalcStatus('idle')
+    } catch (err) {
+      setCalcStatus('error')
+      setCalcError(err.message)
+    }
+  }
 
   function toggle(name) {
     setOpenForm((current) => (current === name ? null : name))
@@ -103,9 +123,40 @@ export default function AddForms({ addGig, addExpense, recentGigs }) {
           </div>
 
           <div className="ldg-field">
+            <label htmlFor="venueAddress">Venue address (optional)</label>
+            <div className="ldg-inline-field">
+              <input
+                type="text"
+                id="venueAddress"
+                value={venueAddress}
+                onChange={(e) => setVenueAddress(e.target.value)}
+                placeholder="123 Main St, City, State ZIP"
+              />
+              <button
+                type="button"
+                className="ldg-btn ldg-btn-calc"
+                onClick={calculateMileage}
+                disabled={calcStatus === 'loading' || !venueAddress.trim()}
+              >
+                {calcStatus === 'loading' ? '…' : 'Calculate'}
+              </button>
+            </div>
+            {calcStatus === 'error' && <p className="ldg-hint ldg-hint-error">{calcError}</p>}
+          </div>
+
+          <div className="ldg-field">
             <label htmlFor="mileage">Mileage (round trip)</label>
-            <input type="number" step="0.1" min="0" id="mileage" name="mileage" placeholder="e.g. 24" />
-            <p className="ldg-hint">An estimate from Google Maps is fine — doesn't need to be exact.</p>
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              id="mileage"
+              name="mileage"
+              value={mileage}
+              onChange={(e) => setMileage(e.target.value)}
+              placeholder="e.g. 24"
+            />
+            <p className="ldg-hint">Auto-fills from the address above (round trip from home), or just type your own estimate.</p>
           </div>
 
           <div className="ldg-field">
