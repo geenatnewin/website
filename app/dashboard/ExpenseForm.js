@@ -144,7 +144,6 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
             type="file"
             id="receiptPhoto"
             accept="image/*"
-            capture="environment"
             onChange={handleReceiptChange}
           />
           {receiptPreview && (
