@@ -60,7 +60,7 @@ export const EXPENSE_CATEGORIES = [
   },
   {
     value: 'supplies', label: 'Supplies & equipment', scheduleC: 'Line 22', chartColor: 'aqua',
-    vendorLabel: 'Vendor',
+    vendorLabel: 'Brand/Vendor',
     extraFields: [
       { name: 'item', label: 'Item / equipment', placeholder: 'e.g. memory card, lens, tripod' },
       { name: 'capitalAsset', label: 'Capital asset', type: 'checkbox' },

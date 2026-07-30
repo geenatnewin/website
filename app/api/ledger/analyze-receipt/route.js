@@ -56,7 +56,7 @@ export async function POST(request) {
   try {
     const base64 = bytes.toString('base64')
     const response = await client.messages.create({
-      model: 'claude-haiku-4-5',
+      model: 'claude-sonnet-5',
       max_tokens: 1024,
       output_config: { format: { type: 'json_schema', schema: RECEIPT_SCHEMA } },
       messages: [
@@ -66,7 +66,7 @@ export async function POST(request) {
             { type: 'image', source: { type: 'base64', media_type: file.type, data: base64 } },
             {
               type: 'text',
-              text: "This is a photo of a receipt for a freelance photographer/videographer's tax records. Extract the vendor name, purchase date, and each line item with its price. If the receipt only shows one total with no itemized breakdown, return a single item using the total amount and a short description of what was purchased. Leave vendor or date as an empty string if illegible.",
+              text: "This is a photo of a receipt for a freelance photographer/videographer's tax records. Extract the vendor name, purchase date, and each line item with its price. For each item's description, write a short summarized name (a few words — e.g. \"NiSi Magnetic Filter Kit\", not the full verbose product title with every spec in parentheses). If tax is broken out as its own line, include it as a separate item named \"Tax\". If shipping is charged, include it as a separate item named \"Shipping\". Do not include the subtotal or the grand total as an item — only the individual charges that make it up. If the receipt only shows one total with no itemized breakdown, return a single item using the total amount and a short description of what was purchased. Leave vendor or date as an empty string if illegible.",
             },
           ],
         },
