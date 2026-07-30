@@ -32,6 +32,7 @@ export async function addGig(formData) {
     gigDate: formData.get('gigDate'),
     client: formData.get('client'),
     gigType: formData.get('gigType'),
+    gigTypeOther: formData.get('gigTypeOther'),
     grossPayment: formData.get('grossPayment'),
     paymentMethod: formData.get('paymentMethod'),
     datePaid: formData.get('datePaid'),

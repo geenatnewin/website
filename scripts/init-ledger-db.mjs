@@ -28,6 +28,7 @@ await sql`
     status TEXT NOT NULL DEFAULT 'paid',
     mileage NUMERIC(6,1) NOT NULL DEFAULT 0,
     notes TEXT,
+    gig_type_other TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
   )
 `

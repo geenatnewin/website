@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
 
 export default function OwnerAccess() {
+  const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
@@ -42,6 +44,8 @@ export default function OwnerAccess() {
       setLoading(false)
     }
   }
+
+  if (pathname?.startsWith('/ledger')) return null
 
   return (
     <div className="owner-access" ref={wrapRef}>

@@ -1,9 +1,13 @@
 export const dynamic = 'force-dynamic'
 
 import { getGigs, getExpenses } from '../db'
+import { logout } from '../actions'
 import { mileageDeduction } from '../mileage'
-import { EXPENSE_CATEGORIES, categoryScheduleCLine } from '../categories'
+import { EXPENSE_CATEGORIES, MILEAGE_CHART_COLOR } from '../categories'
+import LedgerShell from '../LedgerShell'
 import PrintButton from './PrintButton'
+import CategoryDonut from './CategoryDonut'
+import QuarterBars from './QuarterBars'
 
 export const metadata = { title: 'Ledger — Report' }
 
@@ -25,6 +29,17 @@ export default async function LedgerReport() {
   const categoryExpenseTotal = Object.values(byCategory).reduce((a, b) => a + b, 0)
   const totalExpenses = categoryExpenseTotal + mileageDeductionTotal
   const netProfit = totalIncome - totalExpenses
+
+  const donutSegments = [
+    ...(mileageDeductionTotal > 0
+      ? [{ label: 'Car & mileage', value: mileageDeductionTotal, color: MILEAGE_CHART_COLOR }]
+      : []),
+    ...EXPENSE_CATEGORIES.filter((c) => byCategory[c.value] > 0).map((c) => ({
+      label: c.label,
+      value: byCategory[c.value],
+      color: c.chartColor,
+    })),
+  ].sort((a, b) => b.value - a.value)
 
   const quarters = [
     { label: 'Q1', income: 0, expenses: 0 },
@@ -48,70 +63,69 @@ export default async function LedgerReport() {
     .filter(([, total]) => total >= 600)
     .sort((a, b) => b[1] - a[1])
 
+  const currentQuarter = quarterIndex(new Date())
+
   return (
-    <>
-      <nav className="ldg-nav ldg-no-print">
-        <span className="ldg-brand">[LEDGER]</span>
-        <div className="ldg-nav-links">
-          <a href="/ledger">[DASHBOARD]</a>
-          <a href="/api/ledger/export">[EXPORT CSV]</a>
-        </div>
-      </nav>
-
-      <div className="ldg-report">
-        <section className="ldg-report-section">
-          <p className="ldg-report-title">FIG. 1 — Summary (Schedule C style)</p>
-          <div className="ldg-report-row">
-            <span>Gross receipts</span>
-            <span>${totalIncome.toFixed(2)}</span>
-          </div>
-          {EXPENSE_CATEGORIES.map((c) => (
-            <div className="ldg-report-row" key={c.value}>
-              <span>{c.label} <span className="ldg-report-sub">{c.scheduleC}</span></span>
-              <span>${byCategory[c.value].toFixed(2)}</span>
-            </div>
-          ))}
-          <div className="ldg-report-row">
-            <span>Car & truck expenses (mileage) <span className="ldg-report-sub">Line 9 · {totalMileage.toFixed(1)} mi</span></span>
-            <span>${mileageDeductionTotal.toFixed(2)}</span>
-          </div>
-          <div className="ldg-report-row ldg-report-total">
-            <span>Total expenses</span>
-            <span>${totalExpenses.toFixed(2)}</span>
-          </div>
-          <div className="ldg-report-row ldg-report-total">
-            <span>Net profit</span>
-            <span>${netProfit.toFixed(2)}</span>
-          </div>
-        </section>
-
-        <section className="ldg-report-section">
-          <p className="ldg-report-title">FIG. 2 — By quarter (for estimated tax payments)</p>
-          <div className="ldg-quarter-grid">
-            {quarters.map((q) => (
-              <div className="ldg-quarter-cell" key={q.label}>
-                <span>{q.label}</span>
-                <div>Income: ${q.income.toFixed(2)}</div>
-                <div>Expenses: ${q.expenses.toFixed(2)}</div>
-                <div>Net: ${(q.income - q.expenses).toFixed(2)}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="ldg-report-section">
-          <p className="ldg-report-title">FIG. 3 — Clients paid $600+ (likely 1099 territory)</p>
-          {likely1099.length === 0 && <p className="ldg-empty">No client has hit $600 yet.</p>}
-          {likely1099.map(([client, total]) => (
-            <div className="ldg-report-row" key={client}>
-              <span>{client}</span>
-              <span>${total.toFixed(2)}</span>
-            </div>
-          ))}
-        </section>
-
+    <LedgerShell active="report" logout={logout}>
+      <div className="ldg-report-header ldg-no-print">
+        <h1 className="ldg-page-title">Report</h1>
         <PrintButton />
       </div>
-    </>
+
+      <section className="ldg-report-grid">
+        <div className="ldg-card">
+          <p className="ldg-card-title">Expenses by category</p>
+          <CategoryDonut segments={donutSegments} />
+        </div>
+
+        <div className="ldg-card">
+          <p className="ldg-card-title">Net by quarter</p>
+          <QuarterBars quarters={quarters} currentIndex={currentQuarter} />
+        </div>
+      </section>
+
+      <section className="ldg-card ldg-report-summary">
+        <p className="ldg-card-title">Summary (Schedule C style)</p>
+        <div className="ldg-report-row ldg-report-income">
+          <span>Gross receipts</span>
+          <span>${totalIncome.toFixed(2)}</span>
+        </div>
+        {EXPENSE_CATEGORIES.map((c) => (
+          <div className="ldg-report-row" key={c.value}>
+            <span>
+              <span className="ldg-legend-dot" style={{ background: `var(--chart-${c.chartColor})` }} />
+              {c.label} <span className="ldg-report-sub">{c.scheduleC}</span>
+            </span>
+            <span>${byCategory[c.value].toFixed(2)}</span>
+          </div>
+        ))}
+        <div className="ldg-report-row">
+          <span>
+            <span className="ldg-legend-dot" style={{ background: `var(--chart-${MILEAGE_CHART_COLOR})` }} />
+            Car & truck expenses (mileage) <span className="ldg-report-sub">Line 9 · {totalMileage.toFixed(1)} mi</span>
+          </span>
+          <span>${mileageDeductionTotal.toFixed(2)}</span>
+        </div>
+        <div className="ldg-report-row ldg-report-total">
+          <span>Total expenses</span>
+          <span>${totalExpenses.toFixed(2)}</span>
+        </div>
+        <div className={`ldg-report-row ldg-report-total ${netProfit < 0 ? 'ldg-negative' : 'ldg-positive'}`}>
+          <span>Net profit</span>
+          <span>${netProfit.toFixed(2)}</span>
+        </div>
+      </section>
+
+      <section className="ldg-card">
+        <p className="ldg-card-title">Clients paid $600+ (likely 1099 territory)</p>
+        {likely1099.length === 0 && <p className="ldg-empty">No client has hit $600 yet.</p>}
+        {likely1099.map(([client, total]) => (
+          <div className="ldg-report-row" key={client}>
+            <span>{client} <span className="ldg-badge ldg-badge-warning">1099</span></span>
+            <span>${total.toFixed(2)}</span>
+          </div>
+        ))}
+      </section>
+    </LedgerShell>
   )
 }

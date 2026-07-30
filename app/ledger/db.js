@@ -18,6 +18,7 @@ export async function insertGig({
   gigDate,
   client,
   gigType,
+  gigTypeOther,
   grossPayment,
   paymentMethod,
   datePaid,
@@ -26,8 +27,8 @@ export async function insertGig({
   notes,
 }) {
   await sql`
-    INSERT INTO gigs (gig_date, client, gig_type, gross_payment, payment_method, date_paid, status, mileage, notes)
-    VALUES (${gigDate}, ${client}, ${gigType}, ${grossPayment}, ${paymentMethod || null}, ${datePaid || null}, ${status}, ${mileage || 0}, ${notes || null})
+    INSERT INTO gigs (gig_date, client, gig_type, gig_type_other, gross_payment, payment_method, date_paid, status, mileage, notes)
+    VALUES (${gigDate}, ${client}, ${gigType}, ${gigType === 'other' ? gigTypeOther || null : null}, ${grossPayment}, ${paymentMethod || null}, ${datePaid || null}, ${status}, ${mileage || 0}, ${notes || null})
   `
 }
 
