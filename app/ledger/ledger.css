@@ -499,26 +499,6 @@
 .ldg-input:focus { border-color: #2f7cf6; }
 .ldg-error { color: var(--critical); font-size: 0.82rem; font-weight: 600; }
 
-.ldg-login-remembered { font-size: 0.85rem; color: var(--text-secondary); }
-.ldg-forget-link {
-  background: none;
-  border: none;
-  color: #2f7cf6;
-  font-size: 0.85rem;
-  cursor: pointer;
-  padding: 0;
-  text-decoration: underline;
-}
-.ldg-remember-username {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.78rem;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-.ldg-remember-username input { width: auto; }
-
 /* ── REPORT ── */
 .ldg-report-grid {
   display: grid;

@@ -16,9 +16,8 @@ export async function login(formData) {
     redirect('/ledger/login?locked=1')
   }
 
-  const username = formData.get('username')
   const password = formData.get('password')
-  if (username !== process.env.LEDGER_USERNAME || password !== process.env.LEDGER_PASSWORD) {
+  if (password !== process.env.LEDGER_PASSWORD) {
     const result = await recordFailedAttempt(ip)
     if (result.lockedOut) {
       redirect('/ledger/login?locked=1')

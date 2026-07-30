@@ -3,24 +3,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 
-const USERNAME_KEY = 'ledgerUsername'
-
 export default function OwnerAccess() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
-  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [rememberedUsername, setRememberedUsername] = useState('')
-  const [remember, setRemember] = useState(true)
   const [error, setError] = useState(false)
   const [remaining, setRemaining] = useState(null)
   const [locked, setLocked] = useState(false)
   const [loading, setLoading] = useState(false)
   const wrapRef = useRef(null)
-
-  useEffect(() => {
-    setRememberedUsername(localStorage.getItem(USERNAME_KEY) || '')
-  }, [])
 
   useEffect(() => {
     if (!open) return
@@ -39,18 +30,13 @@ export default function OwnerAccess() {
     e.preventDefault()
     setLoading(true)
     setError(false)
-    const effectiveUsername = rememberedUsername || username
     try {
       const res = await fetch('/api/ledger/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: effectiveUsername, password }),
+        body: JSON.stringify({ password }),
       })
       if (res.ok) {
-        if (!rememberedUsername) {
-          if (remember) localStorage.setItem(USERNAME_KEY, effectiveUsername)
-          else localStorage.removeItem(USERNAME_KEY)
-        }
         window.location.href = '/ledger'
         return
       }
@@ -68,12 +54,6 @@ export default function OwnerAccess() {
     }
   }
 
-  function forgetUsername() {
-    localStorage.removeItem(USERNAME_KEY)
-    setRememberedUsername('')
-    setUsername('')
-  }
-
   if (pathname?.startsWith('/ledger')) return null
 
   return (
@@ -89,47 +69,22 @@ export default function OwnerAccess() {
         </button>
       ) : (
         <form className="owner-access-form" onSubmit={handleSubmit}>
-          <div className="owner-access-row">
-            {!rememberedUsername && (
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="username"
-                autoFocus
-                disabled={locked}
-                autoComplete="username"
-                className="owner-access-input"
-              />
-            )}
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="password"
-              autoFocus={Boolean(rememberedUsername)}
-              disabled={locked}
-              autoComplete="current-password"
-              className="owner-access-input"
-            />
-            <button type="submit" className="owner-access-go" disabled={loading || locked} aria-label="Enter">→</button>
-          </div>
-          <div className="owner-access-meta">
-            {!rememberedUsername ? (
-              <label className="owner-access-remember">
-                <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-                remember username
-              </label>
-            ) : (
-              <button type="button" className="owner-access-forget" onClick={forgetUsername}>not you?</button>
-            )}
-            {error && (
-              <span className="owner-access-error">
-                wrong{remaining != null ? ` — ${remaining} left` : ''}
-              </span>
-            )}
-            {locked && <span className="owner-access-error">locked 10 min</span>}
-          </div>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="password"
+            autoFocus
+            disabled={locked}
+            className="owner-access-input"
+          />
+          <button type="submit" className="owner-access-go" disabled={loading || locked} aria-label="Enter">→</button>
+          {error && (
+            <span className="owner-access-error">
+              wrong{remaining != null ? ` — ${remaining} left` : ''}
+            </span>
+          )}
+          {locked && <span className="owner-access-error">locked 10 min</span>}
         </form>
       )}
     </div>
