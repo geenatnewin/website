@@ -8,7 +8,9 @@ export const config = {
 export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  if (pathname === '/dashboard/login' || pathname === '/api/ledger/login') {
+  // Login page/route, plus the tab favicon — a browser requests the favicon before any
+  // auth exists (e.g. on the login page itself), so gating it behind login just breaks it.
+  if (pathname === '/dashboard/login' || pathname === '/api/ledger/login' || pathname === '/dashboard/icon.svg') {
     return NextResponse.next()
   }
 
