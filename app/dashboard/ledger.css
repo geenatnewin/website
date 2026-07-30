@@ -579,6 +579,32 @@
   font-style: italic;
 }
 
+/* ── EXPANDABLE ROWS (click a gig/expense row to reveal extra fields) ── */
+.ldg-row-expandable { cursor: pointer; }
+.ldg-row-expandable:hover { background: rgba(255, 255, 255, 0.04); border-radius: 6px; }
+.ldg-row-expandable:focus-visible { outline: 2px solid #2f7cf6; outline-offset: 2px; border-radius: 6px; }
+.ldg-row-chevron {
+  display: inline-block;
+  flex: 0 0 auto;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  transition: transform 0.15s;
+}
+.ldg-row-chevron-open { transform: rotate(90deg); }
+
+.ldg-expense-details {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  padding: 0.3rem 0 0.4rem 1.1rem;
+  margin-top: -0.15rem;
+  margin-bottom: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+.ldg-expense-details-receipt { padding-left: 0; }
+
 /* ── LOGIN ── */
 .ldg-login-wrap {
   min-height: 100%;
