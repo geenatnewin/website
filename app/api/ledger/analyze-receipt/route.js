@@ -21,13 +21,31 @@ const RECEIPT_SCHEMA = {
         additionalProperties: false,
       },
     },
+    tax: { type: 'number', description: 'Sales tax on its own line; 0 if the receipt has no separate tax line' },
+    shipping: { type: 'number', description: 'Shipping/delivery charge on its own line; 0 if none' },
   },
-  required: ['vendor', 'date', 'items'],
+  required: ['vendor', 'date', 'items', 'tax', 'shipping'],
   additionalProperties: false,
 }
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic']
 const MAX_BYTES = 10 * 1024 * 1024
+
+// Splits tax/shipping across items by each item's share of the subtotal, in integer
+// cents so the allocated amounts always sum exactly back to itemsTotal + extraCents
+// (remainder lands on the last item rather than drifting from float rounding).
+function allocateExtraCharges(items, extraCents) {
+  const subtotalCents = items.reduce((sum, it) => sum + Math.round(it.amount * 100), 0)
+  if (extraCents <= 0 || subtotalCents <= 0) return items
+  let allocated = 0
+  return items.map((it, i) => {
+    const itemCents = Math.round(it.amount * 100)
+    const isLast = i === items.length - 1
+    const shareCents = isLast ? extraCents - allocated : Math.round((itemCents / subtotalCents) * extraCents)
+    allocated += shareCents
+    return { description: it.description, amount: (itemCents + shareCents) / 100 }
+  })
+}
 
 export async function POST(request) {
   const formData = await request.formData()
@@ -66,7 +84,7 @@ export async function POST(request) {
             { type: 'image', source: { type: 'base64', media_type: file.type, data: base64 } },
             {
               type: 'text',
-              text: "This is a photo of a receipt for a freelance photographer/videographer's tax records. Extract the vendor name, purchase date, and each line item with its price. For each item's description, write a short summarized name (a few words — e.g. \"NiSi Magnetic Filter Kit\", not the full verbose product title with every spec in parentheses). Do not list tax or shipping as their own separate items — instead, allocate them proportionally into each item's amount, based on that item's share of the subtotal, so each item's amount reflects its true total cost. This matters because these amounts get checked against a $2,500-per-item threshold to flag capital assets for depreciation, and sales tax/shipping count toward that cost basis. The item amounts you return should sum to the receipt's grand total. Do not include the subtotal or the grand total themselves as an item. If the receipt only shows one total with no itemized breakdown, return a single item using the total amount and a short description of what was purchased. Leave vendor or date as an empty string if illegible.",
+              text: "This is a photo of a receipt for a freelance photographer/videographer's tax records. Extract the vendor name, purchase date, and every individual line item with its own price — list every item that appears on the receipt; do not skip, merge, or summarize multiple items into one. For each item's description, write a short summarized name (a few words — e.g. \"NiSi Magnetic Filter Kit\", not the full verbose product title with every spec in parentheses). Separately: if sales tax is broken out as its own line, put that amount in the \"tax\" field (0 if there's no separate tax line). If there's a separate shipping/delivery charge, put that in the \"shipping\" field (0 if none). Do not include tax, shipping, the subtotal, or the grand total as one of the items — items should only be the actual products/services purchased. If the receipt only shows one total with no itemized breakdown, return a single item using the total amount and a short description of what was purchased, with tax and shipping left as 0. Leave vendor or date as an empty string if illegible.",
             },
           ],
         },
@@ -79,9 +97,13 @@ export async function POST(request) {
     }
 
     const parsed = JSON.parse(block.text)
-    const items = (parsed.items || [])
+    const rawItems = (parsed.items || [])
       .map((it) => ({ description: String(it.description || '').slice(0, 200), amount: Number(it.amount) }))
       .filter((it) => Number.isFinite(it.amount) && it.amount > 0)
+
+    const taxCents = Number.isFinite(parsed.tax) ? Math.round(parsed.tax * 100) : 0
+    const shippingCents = Number.isFinite(parsed.shipping) ? Math.round(parsed.shipping * 100) : 0
+    const items = allocateExtraCharges(rawItems, Math.max(taxCents, 0) + Math.max(shippingCents, 0))
 
     return NextResponse.json({
       vendor: parsed.vendor ? String(parsed.vendor).slice(0, 200) : '',
