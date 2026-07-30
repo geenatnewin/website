@@ -1,12 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { categoryLabel, metaSummary } from './categories'
 import { formatMoney } from './format'
 import ExpenseForm from './ExpenseForm'
+import ConfirmModal from './ConfirmModal'
 
 export default function ExpenseLine({ expense, showDate, editExpense, removeExpense, recentGigs }) {
   const [editing, setEditing] = useState(false)
+  const [confirming, setConfirming] = useState(false)
+  const formRef = useRef(null)
 
   if (editing) {
     return (
@@ -19,10 +22,6 @@ export default function ExpenseLine({ expense, showDate, editExpense, removeExpe
     )
   }
 
-  function confirmDelete(e) {
-    if (!confirm('Delete this expense? This cannot be undone.')) e.preventDefault()
-  }
-
   return (
     <div>
       <div className="ldg-expense-row">
@@ -32,14 +31,24 @@ export default function ExpenseLine({ expense, showDate, editExpense, removeExpe
         <span className="ldg-expense-amount">${formatMoney(expense.amount)}</span>
         <div className="ldg-entry-controls ldg-entry-controls-sm">
           <button type="button" className="ldg-icon-btn" onClick={() => setEditing(true)}>Edit</button>
-          <form action={removeExpense.bind(null, expense.id)}>
-            <button type="submit" className="ldg-icon-btn ldg-icon-btn-danger" onClick={confirmDelete}>Delete</button>
+          <form ref={formRef} action={removeExpense.bind(null, expense.id)}>
+            <button type="button" className="ldg-icon-btn ldg-icon-btn-danger" onClick={() => setConfirming(true)}>Delete</button>
           </form>
         </div>
       </div>
       {metaSummary(expense.category, expense.meta) && (
         <div className="ldg-expense-meta">{metaSummary(expense.category, expense.meta)}</div>
       )}
+      <ConfirmModal
+        open={confirming}
+        title="Delete expense?"
+        message="Delete this expense? This cannot be undone."
+        onConfirm={() => {
+          setConfirming(false)
+          formRef.current?.requestSubmit()
+        }}
+        onCancel={() => setConfirming(false)}
+      />
     </div>
   )
 }

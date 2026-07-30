@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { mileageDeduction } from './mileage'
 import { formatMoney } from './format'
 import GigForm from './GigForm'
 import ExpenseLine from './ExpenseLine'
+import ConfirmModal from './ConfirmModal'
 
 export default function GigEntry({
   gig,
@@ -17,6 +18,8 @@ export default function GigEntry({
   recentGigs,
 }) {
   const [editing, setEditing] = useState(false)
+  const [confirming, setConfirming] = useState(false)
+  const formRef = useRef(null)
 
   if (editing) {
     return (
@@ -26,12 +29,9 @@ export default function GigEntry({
     )
   }
 
-  function confirmDelete(e) {
-    const warning = expenses.length > 0
-      ? ` Its ${expenses.length} linked expense${expenses.length === 1 ? '' : 's'} will be kept but unlinked.`
-      : ''
-    if (!confirm(`Delete the gig "${gig.client}"?${warning} This cannot be undone.`)) e.preventDefault()
-  }
+  const warning = expenses.length > 0
+    ? ` Its ${expenses.length} linked expense${expenses.length === 1 ? '' : 's'} will be kept but unlinked.`
+    : ''
 
   return (
     <div className={`ldg-entry ldg-entry-${gig.gig_type}`}>
@@ -46,8 +46,8 @@ export default function GigEntry({
         <span className="ldg-entry-amount">${formatMoney(gig.gross_payment)}</span>
         <div className="ldg-entry-controls">
           <button type="button" className="ldg-icon-btn" onClick={() => setEditing(true)}>Edit</button>
-          <form action={removeGig.bind(null, gig.id)}>
-            <button type="submit" className="ldg-icon-btn ldg-icon-btn-danger" onClick={confirmDelete}>Delete</button>
+          <form ref={formRef} action={removeGig.bind(null, gig.id)}>
+            <button type="button" className="ldg-icon-btn ldg-icon-btn-danger" onClick={() => setConfirming(true)}>Delete</button>
           </form>
         </div>
       </div>
@@ -66,6 +66,16 @@ export default function GigEntry({
           recentGigs={recentGigs}
         />
       ))}
+      <ConfirmModal
+        open={confirming}
+        title="Delete gig?"
+        message={`Delete the gig "${gig.client}"?${warning} This cannot be undone.`}
+        onConfirm={() => {
+          setConfirming(false)
+          formRef.current?.requestSubmit()
+        }}
+        onCancel={() => setConfirming(false)}
+      />
     </div>
   )
 }
