@@ -8,6 +8,7 @@ export const metadata = { title: 'Ledger — Login' }
 export default async function LoginPage({ searchParams }) {
   const params = await searchParams
   const hasError = params?.error
+  const remaining = params?.remaining ? Number(params.remaining) : null
 
   const ip = getClientIP(headers())
   const lockout = await checkLockout(ip)
@@ -35,7 +36,12 @@ export default async function LoginPage({ searchParams }) {
               autoComplete="current-password"
             />
             <button className="ldg-btn" type="submit">Enter</button>
-            {hasError && <p className="ldg-error">Wrong password.</p>}
+            {hasError && (
+              <p className="ldg-error">
+                Wrong password.
+                {remaining != null && ` ${remaining} attempt${remaining === 1 ? '' : 's'} left before a 10-minute lockout.`}
+              </p>
+            )}
           </form>
         )}
       </div>

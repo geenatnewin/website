@@ -8,6 +8,7 @@ export default function OwnerAccess() {
   const [open, setOpen] = useState(false)
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
+  const [remaining, setRemaining] = useState(null)
   const [locked, setLocked] = useState(false)
   const [loading, setLoading] = useState(false)
   const wrapRef = useRef(null)
@@ -18,6 +19,7 @@ export default function OwnerAccess() {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) {
         setOpen(false)
         setError(false)
+        setRemaining(null)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -43,6 +45,7 @@ export default function OwnerAccess() {
         setLocked(true)
       } else {
         setError(true)
+        setRemaining(data.remaining ?? null)
       }
       setLoading(false)
     } catch {
@@ -76,7 +79,11 @@ export default function OwnerAccess() {
             className="owner-access-input"
           />
           <button type="submit" className="owner-access-go" disabled={loading || locked} aria-label="Enter">→</button>
-          {error && <span className="owner-access-error">wrong</span>}
+          {error && (
+            <span className="owner-access-error">
+              wrong{remaining != null ? ` — ${remaining} left` : ''}
+            </span>
+          )}
           {locked && <span className="owner-access-error">locked 10 min</span>}
         </form>
       )}

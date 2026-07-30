@@ -35,6 +35,10 @@ export default function AddForms({ addGig, addExpense, recentGigs }) {
     setOpenForm((current) => (current === name ? null : name))
   }
 
+  function openDatePicker(e) {
+    e.target.showPicker?.()
+  }
+
   return (
     <section className="ldg-add-section">
       <div className="ldg-add-buttons">
@@ -60,7 +64,7 @@ export default function AddForms({ addGig, addExpense, recentGigs }) {
 
           <div className="ldg-field">
             <label htmlFor="gigDate">Date</label>
-            <input type="date" id="gigDate" name="gigDate" required />
+            <input type="date" id="gigDate" name="gigDate" onClick={openDatePicker} required />
           </div>
 
           <div className="ldg-field">
@@ -113,7 +117,7 @@ export default function AddForms({ addGig, addExpense, recentGigs }) {
 
           <div className="ldg-field">
             <label htmlFor="datePaid">Date paid</label>
-            <input type="date" id="datePaid" name="datePaid" />
+            <input type="date" id="datePaid" name="datePaid" onClick={openDatePicker} />
           </div>
 
           <div className="ldg-field">
@@ -176,7 +180,7 @@ export default function AddForms({ addGig, addExpense, recentGigs }) {
 
           <div className="ldg-field">
             <label htmlFor="expenseDate">Date</label>
-            <input type="date" id="expenseDate" name="expenseDate" required />
+            <input type="date" id="expenseDate" name="expenseDate" onClick={openDatePicker} required />
           </div>
 
           <div className="ldg-field">

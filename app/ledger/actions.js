@@ -22,7 +22,7 @@ export async function login(formData) {
     if (result.lockedOut) {
       redirect('/ledger/login?locked=1')
     }
-    redirect('/ledger/login?error=1')
+    redirect(`/ledger/login?error=1&remaining=${result.remaining}`)
   }
 
   await recordSuccessfulLogin(ip)
