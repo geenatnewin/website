@@ -17,7 +17,7 @@ export default async function LoginPage({ searchParams }) {
   return (
     <div className="ldg-login-wrap">
       <div className="ldg-login-box">
-        <p className="ldg-brand">[LEDGER]</p>
+        <p className="ldg-brand">[PRIVATE ACCESS]</p>
         {isLocked ? (
           <p className="ldg-error" style={{ marginTop: '1.5rem' }}>
             Too many failed attempts. Locked out
