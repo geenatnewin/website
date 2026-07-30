@@ -13,6 +13,9 @@ export default function LedgerShell({ active, logout, children }) {
             <a href="/ledger/report" className={`ldg-sidebar-link ${active === 'report' ? 'ldg-sidebar-link-active' : ''}`}>
               Report
             </a>
+            <a href="/ledger/tips" className={`ldg-sidebar-link ${active === 'tips' ? 'ldg-sidebar-link-active' : ''}`}>
+              Tips
+            </a>
             <a href="/ledger/security" className={`ldg-sidebar-link ${active === 'security' ? 'ldg-sidebar-link-active' : ''}`}>
               Security
             </a>

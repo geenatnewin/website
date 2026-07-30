@@ -1,6 +1,8 @@
 import { neon } from '@neondatabase/serverless'
 
-const sql = neon(process.env.DATABASE_URL)
+// See db.js for why this matters — without it, Next.js can cache the fetch() calls
+// this driver makes under the hood, serving stale lockout/attempt-count reads.
+const sql = neon(process.env.DATABASE_URL, { fetchOptions: { cache: 'no-store' } })
 
 // 1 failed attempt + 2 more allowed (3 total) before a 10-minute lockout kicks in.
 const MAX_FAILED_ATTEMPTS = 3

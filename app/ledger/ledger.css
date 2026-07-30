@@ -195,6 +195,36 @@
 }
 .ldg-censored:hover { filter: blur(6px); }
 
+/* ── REMINDERS ── */
+.ldg-reminders { margin-bottom: 1.75rem; }
+.ldg-reminder-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--gridline);
+}
+.ldg-reminder-row:last-of-type { border-bottom: none; }
+.ldg-reminder-icon { flex-shrink: 0; }
+.ldg-reminder-warning { color: var(--text-primary); }
+.ldg-reminder-warning strong { color: var(--warning); }
+.ldg-reminder-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--chart-blue);
+}
+.ldg-reminder-link:hover { opacity: 0.8; }
+
+/* ── TIPS ── */
+.ldg-tip { padding: 1rem 0; border-bottom: 1px solid var(--gridline); }
+.ldg-tip:last-child { border-bottom: none; }
+.ldg-tip-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem; }
+.ldg-tip-body { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+
 /* ── GENERIC CARD ── */
 .ldg-card {
   background: var(--card);

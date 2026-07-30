@@ -7,6 +7,7 @@ import { mileageDeduction } from './mileage'
 import AddForms from './AddForms'
 import RevealAmount from './RevealAmount'
 import LedgerShell from './LedgerShell'
+import RemindersBanner from './RemindersBanner'
 
 export const metadata = { title: 'Ledger' }
 
@@ -39,6 +40,8 @@ export default async function LedgerDashboard() {
   return (
     <LedgerShell active="dashboard" logout={logout}>
       <h1 className="ldg-page-title">Dashboard</h1>
+
+      <RemindersBanner gigs={gigs} expenses={expenses} />
 
       <section className="ldg-stat-grid">
         <div className="ldg-stat-card ldg-stat-grad-1">

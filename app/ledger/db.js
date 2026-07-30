@@ -1,6 +1,9 @@
 import { neon } from '@neondatabase/serverless'
 
-const sql = neon(process.env.DATABASE_URL)
+// Next.js patches the global fetch() and, by default, caches responses — including
+// the HTTP calls this driver makes to Neon's data API. Without this, page reloads can
+// serve a stale snapshot instead of the current database state. Force every query fresh.
+const sql = neon(process.env.DATABASE_URL, { fetchOptions: { cache: 'no-store' } })
 
 export async function getGigs() {
   return sql`SELECT * FROM gigs ORDER BY gig_date DESC, id DESC`
