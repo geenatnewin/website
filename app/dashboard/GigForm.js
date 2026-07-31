@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { GIG_TYPES, PAYMENT_METHODS } from './categories'
+import { Field, fieldInput, fieldHintError, formCard, formTitle, submitBtn, cancelBtn, calcBtn } from './FormField'
 
 function toDateInput(value) {
   if (!value) return ''
@@ -42,66 +43,64 @@ export default function GigForm({ action, initial, onCancel }) {
   }
 
   return (
-    <form action={action} className="ldg-form">
-      <p className="ldg-form-title">{isEdit ? 'Edit gig' : 'FIG. 1 — Add gig'}</p>
+    <form action={action} className={formCard}>
+      <p className={formTitle}>{isEdit ? 'Edit gig' : 'FIG. 1 — Add gig'}</p>
 
-      <div className="ldg-field">
-        <label htmlFor="gigDate">Date</label>
+      <Field label="Date" htmlFor="gigDate">
         <input
           type="date"
           id="gigDate"
           name="gigDate"
+          className={fieldInput}
           defaultValue={toDateInput(initial?.gig_date)}
           onClick={openDatePicker}
           required
         />
-      </div>
+      </Field>
 
-      <div className="ldg-field">
-        <label htmlFor="client">Client / venue</label>
-        <input type="text" id="client" name="client" defaultValue={initial?.client || ''} required />
-      </div>
+      <Field label="Client / venue" htmlFor="client">
+        <input type="text" id="client" name="client" className={fieldInput} defaultValue={initial?.client || ''} required />
+      </Field>
 
-      <div className="ldg-field">
-        <label htmlFor="gigType">Type</label>
-        <select id="gigType" name="gigType" value={gigType} onChange={(e) => setGigType(e.target.value)}>
+      <Field label="Type" htmlFor="gigType">
+        <select id="gigType" name="gigType" className={fieldInput} value={gigType} onChange={(e) => setGigType(e.target.value)}>
           {GIG_TYPES.map((t) => (
             <option key={t.value} value={t.value}>{t.label}</option>
           ))}
         </select>
-      </div>
+      </Field>
 
       {gigType === 'other' && (
-        <div className="ldg-field">
-          <label htmlFor="gigTypeOther">Specify type</label>
+        <Field label="Specify type" htmlFor="gigTypeOther">
           <input
             type="text"
             id="gigTypeOther"
             name="gigTypeOther"
+            className={fieldInput}
             defaultValue={initial?.gig_type_other || ''}
             placeholder="e.g. photo booth, drone footage…"
           />
-        </div>
+        </Field>
       )}
 
-      <div className="ldg-field">
-        <label htmlFor="grossPayment">Gross payment ($)</label>
+      <Field label="Gross payment ($)" htmlFor="grossPayment">
         <input
           type="number"
           step="0.01"
           min="0"
           id="grossPayment"
           name="grossPayment"
+          className={fieldInput}
           defaultValue={initial?.gross_payment ?? ''}
           required
         />
-      </div>
+      </Field>
 
-      <div className="ldg-field">
-        <label htmlFor="paymentMethod">Payment method</label>
+      <Field label="Payment method" htmlFor="paymentMethod">
         <select
           id="paymentMethod"
           name={isPaymentOther ? undefined : 'paymentMethod'}
+          className={fieldInput}
           value={paymentMethod}
           onChange={(e) => setPaymentMethod(e.target.value)}
         >
@@ -110,86 +109,97 @@ export default function GigForm({ action, initial, onCancel }) {
           ))}
           <option value="Other">Other</option>
         </select>
-      </div>
+      </Field>
 
       {isPaymentOther && (
-        <div className="ldg-field">
-          <label htmlFor="paymentMethodOther">Specify payment method</label>
+        <Field label="Specify payment method" htmlFor="paymentMethodOther">
           <input
             type="text"
             id="paymentMethodOther"
             name="paymentMethod"
+            className={fieldInput}
             defaultValue={isKnownMethod ? '' : initial?.payment_method || ''}
             placeholder="e.g. wire transfer"
           />
-        </div>
+        </Field>
       )}
 
-      <div className="ldg-field">
-        <label htmlFor="datePaid">Date paid</label>
+      <Field label="Date paid" htmlFor="datePaid">
         <input
           type="date"
           id="datePaid"
           name="datePaid"
+          className={fieldInput}
           defaultValue={toDateInput(initial?.date_paid)}
           onClick={openDatePicker}
         />
-      </div>
+      </Field>
 
-      <div className="ldg-field">
-        <label htmlFor="status">Status</label>
-        <select id="status" name="status" defaultValue={initial?.status || 'paid'}>
+      <Field label="Status" htmlFor="status">
+        <select id="status" name="status" className={fieldInput} defaultValue={initial?.status || 'paid'}>
           <option value="paid">Paid</option>
           <option value="pending">Pending</option>
         </select>
-      </div>
+      </Field>
 
-      <div className="ldg-field">
-        <label htmlFor="venueAddress">Venue address (optional)</label>
-        <div className="ldg-inline-field">
+      <Field
+        label="Venue address (optional)"
+        htmlFor="venueAddress"
+        hint={calcStatus === 'error' ? calcError : undefined}
+        hintClassName={fieldHintError}
+      >
+        <div className="flex gap-2">
           <input
             type="text"
             id="venueAddress"
+            className={fieldInput}
             value={venueAddress}
             onChange={(e) => setVenueAddress(e.target.value)}
             placeholder="123 Main St, City, State ZIP"
           />
           <button
             type="button"
-            className="ldg-btn ldg-btn-calc"
+            className={calcBtn}
             onClick={calculateMileage}
             disabled={calcStatus === 'loading' || !venueAddress.trim()}
           >
             {calcStatus === 'loading' ? '…' : 'Calculate'}
           </button>
         </div>
-        {calcStatus === 'error' && <p className="ldg-hint ldg-hint-error">{calcError}</p>}
-      </div>
+      </Field>
 
-      <div className="ldg-field">
-        <label htmlFor="mileage">Mileage (round trip)</label>
+      <Field
+        label="Mileage (round trip)"
+        htmlFor="mileage"
+        hint="Auto-fills from the address above (round trip from home), or just type your own estimate."
+      >
         <input
           type="number"
           step="0.1"
           min="0"
           id="mileage"
           name="mileage"
+          className={fieldInput}
           value={mileage}
           onChange={(e) => setMileage(e.target.value)}
           placeholder="e.g. 24"
         />
-        <p className="ldg-hint">Auto-fills from the address above (round trip from home), or just type your own estimate.</p>
-      </div>
+      </Field>
 
-      <div className="ldg-field">
-        <label htmlFor="notes">Notes</label>
-        <textarea id="notes" name="notes" defaultValue={initial?.notes || ''} placeholder="e.g. deliverables, turnaround time…" />
-      </div>
+      <Field label="Notes" htmlFor="notes">
+        <textarea
+          id="notes"
+          name="notes"
+          className={`${fieldInput} min-h-[70px] resize-y`}
+          defaultValue={initial?.notes || ''}
+          placeholder="e.g. deliverables, turnaround time…"
+        />
+      </Field>
 
-      <div className="ldg-form-actions">
-        <button type="submit" className="ldg-btn ldg-btn-submit">{isEdit ? 'Save changes' : 'Add gig'}</button>
+      <div className="flex items-center gap-3">
+        <button type="submit" className={submitBtn}>{isEdit ? 'Save changes' : 'Add gig'}</button>
         {isEdit && (
-          <button type="button" className="ldg-btn ldg-btn-cancel" onClick={onCancel}>Cancel</button>
+          <button type="button" className={cancelBtn} onClick={onCancel}>Cancel</button>
         )}
       </div>
     </form>

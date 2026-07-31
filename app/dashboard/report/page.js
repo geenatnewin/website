@@ -9,6 +9,7 @@ import LedgerShell from '../LedgerShell'
 import PrintButton from './PrintButton'
 import CategoryDonut from './CategoryDonut'
 import QuarterBars from './QuarterBars'
+import { ReportRow, ReportCard } from '../ReportUI'
 
 export const metadata = { title: 'Dashboard — Overview' }
 
@@ -103,80 +104,79 @@ export default async function LedgerReport() {
 
   return (
     <LedgerShell active="report" logout={logout}>
-      <div className="ldg-report-header ldg-no-print">
-        <h1 className="ldg-page-title">Overview</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-extrabold tracking-tight text-white">Overview</h1>
         <PrintButton />
       </div>
 
-      <section className="ldg-report-grid ldg-no-print">
-        <div className="ldg-card">
-          <p className="ldg-card-title">Expenses by category</p>
+      <section className="ldg-no-print mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <ReportCard title="Expenses by category">
           <CategoryDonut segments={donutSegments} />
-        </div>
+        </ReportCard>
 
-        <div className="ldg-card">
-          <p className="ldg-card-title">Net by quarter</p>
+        <ReportCard title="Net by quarter">
           <QuarterBars quarters={quarters} currentIndex={currentQuarter} />
-        </div>
+        </ReportCard>
 
-        <div className="ldg-card">
-          <p className="ldg-card-title">Income by gig type</p>
+        <ReportCard title="Income by gig type">
           <CategoryDonut segments={gigTypeSegments} />
-        </div>
+        </ReportCard>
 
-        <div className="ldg-card">
-          <p className="ldg-card-title">Net by month</p>
+        <ReportCard title="Net by month">
           <QuarterBars quarters={months} currentIndex={currentMonth} />
-        </div>
+        </ReportCard>
       </section>
 
-      <section className="ldg-card ldg-report-summary">
-        <p className="ldg-card-title">Summary (Schedule C style)</p>
-        <div className="ldg-report-row ldg-report-income">
-          <span>Gross receipts</span>
-          <span>${formatMoney(totalIncome)}</span>
-        </div>
-        {EXPENSE_CATEGORIES.map((c) => (
-          <div className="ldg-report-row" key={c.value}>
+      <div className="mb-6">
+        <ReportCard title="Summary (Schedule C style)">
+          <ReportRow className="font-bold text-brand-soft">
+            <span>Gross receipts</span>
+            <span>${formatMoney(totalIncome)}</span>
+          </ReportRow>
+          {EXPENSE_CATEGORIES.map((c) => (
+            <ReportRow key={c.value}>
+              <span>
+                <span className="ldg-legend-dot" style={{ background: `var(--chart-${c.chartColor})` }} />
+                {c.label} <span className="ml-2 text-xs text-white/40">{c.scheduleC}</span>
+              </span>
+              <span>
+                ${formatMoney(byCategory[c.value])}
+                {Math.abs(byCategoryRaw[c.value] - byCategory[c.value]) > 0.004 && (
+                  <span className="ml-2 text-xs text-white/40"> (of ${formatMoney(byCategoryRaw[c.value])} spent)</span>
+                )}
+              </span>
+            </ReportRow>
+          ))}
+          <ReportRow>
             <span>
-              <span className="ldg-legend-dot" style={{ background: `var(--chart-${c.chartColor})` }} />
-              {c.label} <span className="ldg-report-sub">{c.scheduleC}</span>
+              <span className="ldg-legend-dot" style={{ background: `var(--chart-${MILEAGE_CHART_COLOR})` }} />
+              Car & truck expenses (mileage) <span className="ml-2 text-xs text-white/40">Line 9 · {totalMileage.toFixed(1)} mi</span>
             </span>
-            <span>
-              ${formatMoney(byCategory[c.value])}
-              {Math.abs(byCategoryRaw[c.value] - byCategory[c.value]) > 0.004 && (
-                <span className="ldg-report-sub"> (of ${formatMoney(byCategoryRaw[c.value])} spent)</span>
-              )}
-            </span>
-          </div>
-        ))}
-        <div className="ldg-report-row">
-          <span>
-            <span className="ldg-legend-dot" style={{ background: `var(--chart-${MILEAGE_CHART_COLOR})` }} />
-            Car & truck expenses (mileage) <span className="ldg-report-sub">Line 9 · {totalMileage.toFixed(1)} mi</span>
-          </span>
-          <span>${formatMoney(mileageDeductionTotal)}</span>
-        </div>
-        <div className="ldg-report-row ldg-report-total">
-          <span>Total expenses</span>
-          <span>${formatMoney(totalExpenses)}</span>
-        </div>
-        <div className={`ldg-report-row ldg-report-total ${netProfit < 0 ? 'ldg-negative' : 'ldg-positive'}`}>
-          <span>Net profit</span>
-          <span>${formatMoney(netProfit)}</span>
-        </div>
-      </section>
+            <span>${formatMoney(mileageDeductionTotal)}</span>
+          </ReportRow>
+          <ReportRow className="mt-1 border-t-2 border-white/10 pt-3 text-base font-bold">
+            <span>Total expenses</span>
+            <span>${formatMoney(totalExpenses)}</span>
+          </ReportRow>
+          <ReportRow className={`border-none pt-1 text-base font-bold ${netProfit < 0 ? 'text-rose-400' : 'text-brand-soft'}`}>
+            <span>Net profit</span>
+            <span>${formatMoney(netProfit)}</span>
+          </ReportRow>
+        </ReportCard>
+      </div>
 
-      <section className="ldg-card">
-        <p className="ldg-card-title">Clients paid $600+ (likely 1099 territory)</p>
-        {likely1099.length === 0 && <p className="ldg-empty">No client has hit $600 yet.</p>}
+      <ReportCard title="Clients paid $600+ (likely 1099 territory)">
+        {likely1099.length === 0 && <p className="text-sm text-white/40">No client has hit $600 yet.</p>}
         {likely1099.map(([client, total]) => (
-          <div className="ldg-report-row" key={client}>
-            <span>{client} <span className="ldg-badge ldg-badge-warning">1099</span></span>
+          <ReportRow key={client}>
+            <span>
+              {client}{' '}
+              <span className="ml-1 rounded-full bg-yellow-500/90 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide text-ink-950">1099</span>
+            </span>
             <span>${formatMoney(total)}</span>
-          </div>
+          </ReportRow>
         ))}
-      </section>
+      </ReportCard>
     </LedgerShell>
   )
 }

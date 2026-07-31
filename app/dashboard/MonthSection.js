@@ -6,21 +6,26 @@ export default function MonthSection({ label, count, totalLabel, defaultOpen, ch
   const [open, setOpen] = useState(Boolean(defaultOpen))
 
   return (
-    <div className="ldg-month-group">
+    <div className="mb-2 last:mb-0">
       <button
         type="button"
-        className="ldg-month-header"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
+        className="flex w-full items-center gap-2.5 rounded-lg border border-white/[0.06] bg-ink-800 px-3.5 py-2.5 text-left hover:border-white/[0.14] transition-colors"
       >
-        <span className={`ldg-row-chevron ${open ? 'ldg-row-chevron-open' : ''}`} aria-hidden="true">▸</span>
-        <span className="ldg-month-label">{label}</span>
-        <span className="ldg-month-meta">
+        <span
+          className={`inline-block flex-none text-[0.6rem] text-white/40 transition-transform ${open ? 'rotate-90' : ''}`}
+          aria-hidden="true"
+        >
+          &#9656;
+        </span>
+        <span className="text-sm font-bold text-white">{label}</span>
+        <span className="ml-auto whitespace-nowrap text-xs text-white/40">
           {count} {count === 1 ? 'entry' : 'entries'}
           {totalLabel ? ` · ${totalLabel}` : ''}
         </span>
       </button>
-      {open && <div className="ldg-month-body">{children}</div>}
+      {open && <div className="pt-2.5">{children}</div>}
     </div>
   )
 }

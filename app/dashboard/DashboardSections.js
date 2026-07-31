@@ -8,6 +8,42 @@ import ExpenseLine from './ExpenseLine'
 import MonthSection from './MonthSection'
 import { formatMoney } from './format'
 
+// One accent color, used consistently: selected/primary = filled green,
+// everything else = neutral outline. Replaces the old violet-for-Gigs /
+// blue-for-Expenses split — that inconsistent second hue was flagged
+// directly ("don't like the purple and blue badges").
+function ToggleTab({ label, active, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        active
+          ? 'rounded-full px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-brand shadow-[0_4px_14px_-4px_rgba(34,209,126,0.5)]'
+          : 'rounded-full px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white/55 bg-ink-800 border border-white/10 hover:text-white hover:border-white/20 transition-colors'
+      }
+    >
+      {label}
+    </button>
+  )
+}
+
+function AddButton({ label, expanded, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        expanded
+          ? 'self-center rounded-full px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white/70 bg-ink-800 border border-white/10 hover:text-white transition-colors'
+          : 'self-center rounded-full px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-brand shadow-[0_4px_14px_-4px_rgba(34,209,126,0.5)] hover:opacity-90 transition-opacity'
+      }
+    >
+      {label}
+    </button>
+  )
+}
+
 // gigs/generalExpenses arrive pre-sorted DESC by date from the DB query, and Map
 // preserves insertion order, so groups come out newest-month-first for free.
 function groupByMonth(entries, dateField) {
@@ -75,41 +111,25 @@ export default function DashboardSections({
 
   return (
     <>
-      <section className="ldg-add-section">
-        <div className="ldg-add-buttons">
-          <button
-            type="button"
-            className={`ldg-btn ldg-btn-gig ${openBox === 'gigs' ? 'ldg-btn-active' : ''}`}
-            onClick={() => toggleBox('gigs')}
-          >
-            Gigs
-          </button>
-          <button
-            type="button"
-            className={`ldg-btn ldg-btn-expense ${openBox === 'expenses' ? 'ldg-btn-active' : ''}`}
-            onClick={() => toggleBox('expenses')}
-          >
-            Expenses
-          </button>
-        </div>
+      <section className="mb-6 flex flex-wrap gap-3">
+        <ToggleTab label="Gigs" active={openBox === 'gigs'} onClick={() => toggleBox('gigs')} />
+        <ToggleTab label="Expenses" active={openBox === 'expenses'} onClick={() => toggleBox('expenses')} />
       </section>
 
       {openBox === 'gigs' && (
-        <section className="ldg-card ldg-list">
-          <p className="ldg-card-title">Gigs</p>
+        <section className="mb-6 rounded-2xl border border-white/[0.06] bg-ink-900 p-5 md:p-6">
+          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-white/40">Gigs</p>
 
-          <div className="ldg-box-add">
-            <button
-              type="button"
-              className={`ldg-btn ldg-btn-gig ${showAddGig ? 'ldg-btn-active' : ''}`}
+          <div className="mb-7 flex flex-col items-center">
+            <AddButton
+              label={showAddGig ? 'Cancel' : '+ Add gig'}
+              expanded={showAddGig}
               onClick={() => setShowAddGig((v) => !v)}
-            >
-              {showAddGig ? 'Cancel' : '+ Add gig'}
-            </button>
+            />
             {showAddGig && <GigForm key={gigFormKey} action={handleAddGig} />}
           </div>
 
-          {gigs.length === 0 && <p className="ldg-empty">No gigs logged yet.</p>}
+          {gigs.length === 0 && <p className="text-sm text-white/40">No gigs logged yet.</p>}
           {gigMonths.map((group, gi) => (
             <MonthSection
               key={group.key}
@@ -137,21 +157,19 @@ export default function DashboardSections({
       )}
 
       {openBox === 'expenses' && (
-        <section className="ldg-card ldg-list">
-          <p className="ldg-card-title">Expenses</p>
+        <section className="mb-6 rounded-2xl border border-white/[0.06] bg-ink-900 p-5 md:p-6">
+          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-white/40">Expenses</p>
 
-          <div className="ldg-box-add">
-            <button
-              type="button"
-              className={`ldg-btn ldg-btn-expense ${showAddExpense ? 'ldg-btn-active' : ''}`}
+          <div className="mb-7 flex flex-col items-center">
+            <AddButton
+              label={showAddExpense ? 'Cancel' : '+ Add expense'}
+              expanded={showAddExpense}
               onClick={() => setShowAddExpense((v) => !v)}
-            >
-              {showAddExpense ? 'Cancel' : '+ Add expense'}
-            </button>
+            />
             {showAddExpense && <ExpenseForm key={expenseFormKey} action={handleAddExpense} recentGigs={recentGigs} />}
           </div>
 
-          {generalExpenses.length === 0 && <p className="ldg-empty">No general expenses logged yet.</p>}
+          {generalExpenses.length === 0 && <p className="text-sm text-white/40">No general expenses logged yet.</p>}
           {expenseMonths.map((group, gi) => (
             <MonthSection
               key={group.key}
@@ -175,7 +193,14 @@ export default function DashboardSections({
         </section>
       )}
 
-      {toastId > 0 && <div className="ldg-toast" key={toastId}>ADDED</div>}
+      {toastId > 0 && (
+        <div
+          key={toastId}
+          className="fixed bottom-8 left-1/2 z-[999] -translate-x-1/2 animate-[ldg-toast-fade_1.8s_ease_forwards] rounded-full bg-brand px-6 py-2.5 text-xs font-extrabold uppercase tracking-widest text-ink-950 shadow-[0_0_18px_rgba(34,209,126,0.4),0_8px_20px_rgba(0,0,0,0.3)] pointer-events-none"
+        >
+          Added
+        </div>
+      )}
     </>
   )
 }

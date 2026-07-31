@@ -2,16 +2,20 @@
 
 import { useState } from 'react'
 
-export default function RevealAmount({ value }) {
+export default function RevealAmount({ value, className = '', onRevealChange }) {
   const [revealed, setRevealed] = useState(false)
 
   function toggle() {
-    setRevealed((r) => !r)
+    setRevealed((r) => {
+      const next = !r
+      onRevealChange?.(next)
+      return next
+    })
   }
 
   return (
     <strong
-      className={revealed ? 'ldg-revealed' : 'ldg-censored'}
+      className={`${revealed ? 'ldg-revealed' : 'ldg-censored'} ${className}`}
       onClick={toggle}
       role="button"
       tabIndex={0}

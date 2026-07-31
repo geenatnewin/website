@@ -1,5 +1,15 @@
 import { nextQuarterlyDeadline, daysUntil, contractorsOwed1099, stalePendingGigs, missingRecurringExpenses } from './taxTips'
 import { formatMoney } from './format'
+import { ReportCard } from './ReportUI'
+
+function ReminderRow({ icon, warning, children }) {
+  return (
+    <div className={`flex items-start gap-2.5 py-2 text-sm ${warning ? 'text-white' : 'text-white/70'}`}>
+      <span className="flex-none">{icon}</span>
+      <span>{children}</span>
+    </div>
+  )
+}
 
 export default function RemindersBanner({ gigs, expenses }) {
   const deadline = nextQuarterlyDeadline()
@@ -9,21 +19,15 @@ export default function RemindersBanner({ gigs, expenses }) {
   const missingRecurring = missingRecurringExpenses(expenses)
 
   return (
-    <section className="ldg-card ldg-reminders">
-      <p className="ldg-card-title">Reminders</p>
-
-      <div className="ldg-reminder-row">
-        <span className="ldg-reminder-icon">📅</span>
-        <span>
+    <div className="mb-7">
+      <ReportCard title="Reminders">
+        <ReminderRow icon="📅">
           Next estimated tax deadline: <strong>{deadline.label}</strong> ({deadline.due.toLocaleDateString()}) —{' '}
           {days} day{days === 1 ? '' : 's'} away.
-        </span>
-      </div>
+        </ReminderRow>
 
-      {contractors.length > 0 && (
-        <div className="ldg-reminder-row ldg-reminder-warning">
-          <span className="ldg-reminder-icon">⚠️</span>
-          <span>
+        {contractors.length > 0 && (
+          <ReminderRow icon="⚠️" warning>
             You've paid{' '}
             {contractors.map(([name, total], i) => (
               <span key={name}>
@@ -33,24 +37,18 @@ export default function RemindersBanner({ gigs, expenses }) {
             ))}{' '}
             this year — over the $600 threshold, so you may need to send{' '}
             {contractors.length === 1 ? 'them' : 'each of them'} a 1099-NEC by Jan 31.
-          </span>
-        </div>
-      )}
+          </ReminderRow>
+        )}
 
-      {pending.length > 0 && (
-        <div className="ldg-reminder-row ldg-reminder-warning">
-          <span className="ldg-reminder-icon">⏳</span>
-          <span>
+        {pending.length > 0 && (
+          <ReminderRow icon="⏳" warning>
             {pending.length} gig{pending.length === 1 ? ' is' : 's are'} still marked <strong>pending</strong> from
             2+ weeks ago — worth checking if payment came through.
-          </span>
-        </div>
-      )}
+          </ReminderRow>
+        )}
 
-      {missingRecurring.length > 0 && (
-        <div className="ldg-reminder-row ldg-reminder-warning">
-          <span className="ldg-reminder-icon">🔁</span>
-          <span>
+        {missingRecurring.length > 0 && (
+          <ReminderRow icon="🔁" warning>
             No charge logged for{' '}
             {missingRecurring.map((vendor, i) => (
               <span key={vendor}>
@@ -60,11 +58,13 @@ export default function RemindersBanner({ gigs, expenses }) {
             ))}{' '}
             in the last 2 months, though {missingRecurring.length === 1 ? "it's" : "they're"} marked recurring —
             did you forget to log {missingRecurring.length === 1 ? 'it' : 'them'}, or cancel?
-          </span>
-        </div>
-      )}
+          </ReminderRow>
+        )}
 
-      <a href="/dashboard/tips" className="ldg-reminder-link">See all tax tips →</a>
-    </section>
+        <a href="/dashboard/tips" className="mt-3 inline-block text-sm font-semibold text-brand-soft hover:opacity-80 transition-opacity">
+          See all tax tips &rarr;
+        </a>
+      </ReportCard>
+    </div>
   )
 }

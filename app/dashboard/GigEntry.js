@@ -7,6 +7,11 @@ import GigForm from './GigForm'
 import ExpenseLine from './ExpenseLine'
 import ConfirmModal from './ConfirmModal'
 
+const STATUS_STYLE = {
+  paid: 'bg-brand/20 text-brand-soft',
+  pending: 'bg-yellow-500/20 text-yellow-400',
+}
+
 export default function GigEntry({
   gig,
   displayNum,
@@ -22,9 +27,13 @@ export default function GigEntry({
   const [expanded, setExpanded] = useState(false)
   const formRef = useRef(null)
 
+  // "Other" gigs get a neutral border; every real type shares the one accent
+  // (no separate hue per type — the badge text already says which type it is).
+  const accentBorder = gig.gig_type === 'other' ? 'border-l-white/10' : 'border-l-brand/50'
+
   if (editing) {
     return (
-      <div className={`ldg-entry ldg-entry-${gig.gig_type}`}>
+      <div className={`mb-2.5 rounded-xl border-l-4 bg-ink-800 p-4 last:mb-0 ${accentBorder}`}>
         <GigForm action={editGig.bind(null, gig.id)} initial={gig} onCancel={() => setEditing(false)} />
       </div>
     )
@@ -43,9 +52,9 @@ export default function GigEntry({
   }
 
   return (
-    <div className={`ldg-entry ldg-entry-${gig.gig_type}`}>
+    <div className={`mb-2.5 rounded-xl border-l-4 bg-ink-800 p-4 last:mb-0 ${accentBorder}`}>
       <div
-        className={`ldg-entry-head ${hasDetails ? 'ldg-row-expandable' : ''}`}
+        className={`flex flex-wrap items-center gap-3.5 text-sm ${hasDetails ? 'cursor-pointer rounded-lg hover:bg-white/[0.04]' : ''}`}
         onClick={hasDetails ? toggleExpanded : undefined}
         onKeyDown={hasDetails ? toggleExpanded : undefined}
         role={hasDetails ? 'button' : undefined}
@@ -53,39 +62,58 @@ export default function GigEntry({
         aria-expanded={hasDetails ? expanded : undefined}
       >
         {hasDetails && (
-          <span className={`ldg-row-chevron ${expanded ? 'ldg-row-chevron-open' : ''}`} aria-hidden="true">▸</span>
+          <span
+            className={`inline-block flex-none text-[0.6rem] text-white/40 transition-transform ${expanded ? 'rotate-90' : ''}`}
+            aria-hidden="true"
+          >
+            &#9656;
+          </span>
         )}
-        <span className="ldg-entry-num">{displayNum}</span>
-        <span className="ldg-entry-date">{new Date(gig.gig_date).toLocaleDateString()}</span>
-        <span className="ldg-entry-client">{gig.client}</span>
-        <span className={`ldg-entry-type ldg-type-${gig.gig_type}`}>
+        <span className="text-white/40">{displayNum}</span>
+        <span className="text-white/70">{new Date(gig.gig_date).toLocaleDateString()}</span>
+        <span className="font-bold text-white">{gig.client}</span>
+        <span className="rounded-full border border-white/10 bg-ink-700 px-2.5 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide text-white/50">
           {gig.gig_type === 'other' && gig.gig_type_other ? gig.gig_type_other : gig.gig_type}
         </span>
-        <span className={`ldg-status ldg-status-${gig.status}`}>{gig.status}</span>
-        <span className="ldg-entry-amount">${formatMoney(gig.gross_payment)}</span>
+        <span className={`rounded-full px-2.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-wide ${STATUS_STYLE[gig.status] || 'bg-white/10 text-white/60'}`}>
+          {gig.status}
+        </span>
+        <span className="ml-auto font-bold text-white">${formatMoney(gig.gross_payment)}</span>
         <div
-          className="ldg-entry-controls"
+          className="flex gap-0.5"
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >
-          <button type="button" className="ldg-icon-btn" onClick={() => setEditing(true)}>Edit</button>
+          <button
+            type="button"
+            className="rounded px-2 py-1 text-[0.66rem] font-bold uppercase tracking-wide text-white/40 hover:bg-white/10 hover:text-white transition-colors"
+            onClick={() => setEditing(true)}
+          >
+            Edit
+          </button>
           <form ref={formRef} action={removeGig.bind(null, gig.id)}>
-            <button type="button" className="ldg-icon-btn ldg-icon-btn-danger" onClick={() => setConfirming(true)}>Delete</button>
+            <button
+              type="button"
+              className="rounded px-2 py-1 text-[0.66rem] font-bold uppercase tracking-wide text-white/40 hover:bg-rose-500/20 hover:text-rose-400 transition-colors"
+              onClick={() => setConfirming(true)}
+            >
+              Delete
+            </button>
           </form>
         </div>
       </div>
       {expanded && hasDetails && (
-        <div className="ldg-entry-sub">
+        <div className="mt-2 text-sm text-white/55">
           {gig.payment_method && <div>Payment method: {gig.payment_method}</div>}
           {gig.date_paid && <div>Date paid: {new Date(gig.date_paid).toLocaleDateString()}</div>}
         </div>
       )}
       {Number(gig.mileage) > 0 && (
-        <div className="ldg-entry-sub">
-          Mileage: {gig.mileage} mi → ${formatMoney(mileageDeduction(gig.gig_date, gig.mileage))} deduction (est.)
+        <div className="mt-2 text-sm text-white/55">
+          Mileage: {gig.mileage} mi &rarr; ${formatMoney(mileageDeduction(gig.gig_date, gig.mileage))} deduction (est.)
         </div>
       )}
-      {gig.notes && <div className="ldg-entry-sub">{gig.notes}</div>}
+      {gig.notes && <div className="mt-2 text-sm text-white/55">{gig.notes}</div>}
       {expenses.map((e) => (
         <ExpenseLine
           key={e.id}

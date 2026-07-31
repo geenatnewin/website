@@ -7,6 +7,7 @@ import LedgerShell from '../LedgerShell'
 import RemindersBanner from '../RemindersBanner'
 import EstimatedTaxCard from './EstimatedTaxCard'
 import HomeOfficeCard from './HomeOfficeCard'
+import { ReportCard } from '../ReportUI'
 
 export const metadata = { title: 'Dashboard — Tips' }
 
@@ -16,27 +17,30 @@ export default async function TipsPage() {
 
   return (
     <LedgerShell active="tips" logout={logout}>
-      <h1 className="ldg-page-title">Tips</h1>
+      <h1 className="mb-6 text-center text-2xl font-extrabold tracking-tight text-white md:text-left">Tips</h1>
 
       <RemindersBanner gigs={gigs} expenses={expenses} />
 
-      <EstimatedTaxCard ytdIncome={ytdIncome} ytdExpenses={ytdExpenses} netProfit={netProfit} />
+      <div className="mb-6">
+        <EstimatedTaxCard ytdIncome={ytdIncome} ytdExpenses={ytdExpenses} netProfit={netProfit} />
+      </div>
 
-      <HomeOfficeCard />
+      <div className="mb-6">
+        <HomeOfficeCard />
+      </div>
 
-      <section className="ldg-card">
-        <p className="ldg-card-title">General tax tips</p>
-        <p className="ldg-hint" style={{ marginBottom: '1.25rem' }}>
+      <ReportCard title="General tax tips">
+        <p className="mb-5 text-xs text-white/40">
           General educational info, not professional tax advice — confirm specifics with a licensed
           tax preparer for your situation.
         </p>
         {GENERAL_TAX_TIPS.map((tip) => (
-          <div className="ldg-tip" key={tip.title}>
-            <p className="ldg-tip-title">{tip.title}</p>
-            <p className="ldg-tip-body">{tip.body}</p>
+          <div className="border-b border-white/[0.06] py-4 last:border-none first:pt-0" key={tip.title}>
+            <p className="mb-1.5 text-sm font-bold text-white">{tip.title}</p>
+            <p className="text-sm leading-relaxed text-white/55">{tip.body}</p>
           </div>
         ))}
-      </section>
+      </ReportCard>
     </LedgerShell>
   )
 }

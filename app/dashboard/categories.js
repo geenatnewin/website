@@ -8,7 +8,8 @@ export const PAYMENT_METHODS = [
   'Cash',
 ]
 
-// chartColor matches the .ldg-type-* badge colors already used on gig entries.
+// chartColor is used by the report page's gig-type donut chart (GigEntry.js's
+// own badge/border no longer varies by type — see GigEntry.js).
 export const GIG_TYPES = [
   { value: 'photography', label: 'Photography', chartColor: 'blue' },
   { value: 'videography', label: 'Videography', chartColor: 'violet' },

@@ -4,6 +4,20 @@ import { useRef, useState } from 'react'
 import { EXPENSE_CATEGORIES, categoryConfig } from './categories'
 import { isPdfKey } from './format'
 import ReceiptLightbox from './ReceiptLightbox'
+import {
+  Field,
+  fieldInput,
+  fieldHint,
+  fieldHintError,
+  fieldHintWarning,
+  formCard,
+  formTitle,
+  submitBtn,
+  cancelBtn,
+  calcBtn,
+  checkboxLabel,
+  iconBtnDanger,
+} from './FormField'
 
 function toDateInput(value) {
   if (!value) return ''
@@ -148,14 +162,14 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
   }
 
   return (
-    <form action={action} className="ldg-form">
-      <p className="ldg-form-title">{isEdit ? 'Edit expense' : 'FIG. 2 — Add expense'}</p>
+    <form action={action} className={formCard}>
+      <p className={formTitle}>{isEdit ? 'Edit expense' : 'FIG. 2 — Add expense'}</p>
 
-      <div className="ldg-field">
-        <label htmlFor="category">Category</label>
+      <Field label="Category" htmlFor="category" hint={expenseCategoryConfig?.hint}>
         <select
           id="category"
           name="category"
+          className={fieldInput}
           value={expenseCategory}
           onChange={(e) => setExpenseCategory(e.target.value)}
         >
@@ -163,27 +177,25 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
             <option key={c.value} value={c.value}>{c.label}</option>
           ))}
         </select>
-        {expenseCategoryConfig?.hint && <p className="ldg-hint">{expenseCategoryConfig.hint}</p>}
-      </div>
+      </Field>
 
       {!isInsurance && (
-        <div className="ldg-field">
-          <label htmlFor="expenseDate">Date</label>
+        <Field label="Date" htmlFor="expenseDate">
           <input
             type="date"
             id="expenseDate"
             name="expenseDate"
+            className={fieldInput}
             ref={expenseDateRef}
             defaultValue={toDateInput(initial?.expense_date)}
             onClick={(e) => e.target.showPicker?.()}
             required
           />
-        </div>
+        </Field>
       )}
 
-      <div className="ldg-field">
-        <label htmlFor="gigId">Linked gig</label>
-        <select id="gigId" name="gigId" defaultValue={initial?.gig_id || ''}>
+      <Field label="Linked gig" htmlFor="gigId">
+        <select id="gigId" name="gigId" className={fieldInput} defaultValue={initial?.gig_id || ''}>
           <option value="">General (not tied to a gig)</option>
           {recentGigs.map((g) => (
             <option key={g.id} value={g.id}>
@@ -191,48 +203,53 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
             </option>
           ))}
         </select>
-      </div>
+      </Field>
 
       {showReceiptUpload && (
-        <div className="ldg-field">
-          <label htmlFor="receiptPhoto">Receipt Photo or PDF (optional, one or more)</label>
+        <Field label="Receipt Photo or PDF (optional, one or more)" htmlFor="receiptPhoto">
           <input
             type="file"
             id="receiptPhoto"
             accept="image/*,application/pdf"
             multiple
+            className="block w-full text-sm text-white/60 file:mr-3 file:rounded-lg file:border-0 file:bg-ink-700 file:px-3 file:py-2 file:text-xs file:font-bold file:uppercase file:tracking-wide file:text-white/70 hover:file:text-white"
             onChange={handleFilesSelected}
           />
 
           {pendingFiles.length > 0 && (
             <>
-              <div className="ldg-receipt-pending">
+              <div className="mt-2 flex flex-wrap items-start gap-2.5">
                 {pendingFiles.map((f) => (
-                  <div key={f.id} className="ldg-receipt-pending-item">
+                  <div key={f.id} className="flex flex-col items-center gap-1">
                     {f.file.type === 'application/pdf' ? (
-                      <div className="ldg-receipt-pdf-chip" title={f.file.name}>PDF</div>
+                      <div
+                        className="flex h-[72px] w-[72px] items-center justify-center rounded-lg border border-white/10 bg-ink-700 text-center text-xs font-bold tracking-wide text-white/50"
+                        title={f.file.name}
+                      >
+                        PDF
+                      </div>
                     ) : (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={f.previewUrl} alt={f.file.name} className="ldg-receipt-preview ldg-receipt-preview-sm" />
+                      <img src={f.previewUrl} alt={f.file.name} className="h-[72px] w-[72px] rounded-lg border border-white/10 object-cover" />
                     )}
-                    <button type="button" className="ldg-icon-btn ldg-icon-btn-danger" onClick={() => removePendingFile(f.id)}>
+                    <button type="button" className={iconBtnDanger} onClick={() => removePendingFile(f.id)}>
                       Remove
                     </button>
                   </div>
                 ))}
               </div>
-              <button type="button" className="ldg-btn ldg-btn-calc" onClick={scanReceipts} disabled={analyzing}>
+              <button type="button" className={`mt-2 ${calcBtn}`} onClick={scanReceipts} disabled={analyzing}>
                 {analyzing ? 'Scanning…' : `Scan ${pendingFiles.length} file${pendingFiles.length === 1 ? '' : 's'}`}
               </button>
-              <p className="ldg-hint">Remove anything that shouldn't be here first — scanning is what actually reads the file(s) and costs an API call.</p>
+              <p className={fieldHint}>Remove anything that shouldn't be here first — scanning is what actually reads the file(s) and costs an API call.</p>
             </>
           )}
 
-          {analyzeError && <p className="ldg-hint ldg-hint-error">{analyzeError}</p>}
+          {analyzeError && <p className={fieldHintError}>{analyzeError}</p>}
 
           {receiptKeys.length > 0 && !analyzing && (
             <>
-              <div className="ldg-receipt-pending">
+              <div className="mt-2 flex flex-wrap gap-2.5">
                 {receiptKeys.map((key, i) => (
                   isPdfKey(key) ? (
                     <a
@@ -240,7 +257,7 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
                       href={`/api/ledger/receipt?key=${encodeURIComponent(key)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="ldg-receipt-pdf-chip"
+                      className="flex h-[72px] w-[72px] items-center justify-center rounded-lg border border-white/10 bg-ink-700 text-center text-xs font-bold tracking-wide text-white/50 hover:text-white transition-colors"
                     >
                       PDF
                     </a>
@@ -248,18 +265,18 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
                     <button
                       key={key}
                       type="button"
-                      className="ldg-receipt-preview-btn"
+                      className="rounded-lg p-0 hover:opacity-85 transition-opacity"
                       onClick={() => setLightboxIndex(i)}
                       aria-label={`View receipt photo ${i + 1} full-size`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={`/api/ledger/receipt?key=${encodeURIComponent(key)}`} alt={`Receipt ${i + 1}`} className="ldg-receipt-preview ldg-receipt-preview-sm" />
+                      <img src={`/api/ledger/receipt?key=${encodeURIComponent(key)}`} alt={`Receipt ${i + 1}`} className="h-[72px] w-[72px] rounded-lg border border-white/10 object-cover" />
                     </button>
                   )
                 ))}
               </div>
-              <p className="ldg-hint">
-                ✓ {receiptKeys.length} receipt file{receiptKeys.length === 1 ? '' : 's'} attached — tap to view. Double-check the fields below before submitting.
+              <p className={fieldHint}>
+                &#10003; {receiptKeys.length} receipt file{receiptKeys.length === 1 ? '' : 's'} attached — tap to view. Double-check the fields below before submitting.
               </p>
             </>
           )}
@@ -267,7 +284,7 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
           {receiptKeys.map((key) => (
             <input key={key} type="hidden" name="receiptKey" value={key} readOnly />
           ))}
-        </div>
+        </Field>
       )}
       <ReceiptLightbox
         src={lightboxIndex !== null && receiptKeys[lightboxIndex] ? `/api/ledger/receipt?key=${encodeURIComponent(receiptKeys[lightboxIndex])}` : null}
@@ -275,14 +292,14 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
       />
 
       {isMealsBulk ? (
-        <div className="ldg-field">
-          <label>Meals</label>
+        <Field label="Meals" hint="One row per meal (breakfast, lunch, dinner…) — each is logged as its own expense line.">
           {mealRows.map((row, i) => (
-            <div className="ldg-meal-row" key={i}>
+            <div className="mb-2 flex items-center gap-2" key={i}>
               <input
                 type="text"
                 placeholder="Restaurant"
                 name="mealVendor"
+                className={`${fieldInput} flex-1`}
                 value={row.vendor}
                 onChange={(e) => updateMealRow(i, 'vendor', e.target.value)}
               />
@@ -291,42 +308,39 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
                 step="0.01"
                 min="0"
                 placeholder="Amount"
-                className="ldg-meal-amount"
+                className={`${fieldInput} w-[100px] flex-none`}
                 name="mealAmount"
                 value={row.amount}
                 onChange={(e) => updateMealRow(i, 'amount', e.target.value)}
                 required={i === 0}
               />
               {mealRows.length > 1 && (
-                <button
-                  type="button"
-                  className="ldg-icon-btn ldg-icon-btn-danger"
-                  onClick={() => removeMealRow(i)}
-                >
+                <button type="button" className={`flex-none ${iconBtnDanger}`} onClick={() => removeMealRow(i)}>
                   Remove
                 </button>
               )}
             </div>
           ))}
-          <button type="button" className="ldg-btn ldg-btn-calc" onClick={addMealRow}>+ Add another meal</button>
-          <p className="ldg-hint">One row per meal (breakfast, lunch, dinner…) — each is logged as its own expense line.</p>
-        </div>
+          <button type="button" className={calcBtn} onClick={addMealRow}>+ Add another meal</button>
+        </Field>
       ) : isSuppliesBulk ? (
         <>
-          <div className="ldg-field">
-            <label htmlFor="vendor">{expenseCategoryConfig?.vendorLabel || 'Vendor'}</label>
-            <input type="text" id="vendor" name="vendor" ref={vendorRef} defaultValue={initial?.vendor || ''} />
-          </div>
+          <Field label={expenseCategoryConfig?.vendorLabel || 'Vendor'} htmlFor="vendor">
+            <input type="text" id="vendor" name="vendor" className={fieldInput} ref={vendorRef} defaultValue={initial?.vendor || ''} />
+          </Field>
 
-          <div className="ldg-field">
-            <label>Items</label>
+          <Field
+            label="Items"
+            hint="One row per item in this purchase — they're saved together as a single expense, itemized (click the entry afterward to see the breakdown)."
+          >
             {supplyRows.map((row, i) => (
-              <div key={i}>
-                <div className="ldg-meal-row">
+              <div key={i} className="mb-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <input
                     type="text"
                     placeholder="Item / equipment"
                     name="supplyItem"
+                    className={`${fieldInput} min-w-[140px] flex-1`}
                     value={row.item}
                     onChange={(e) => updateSupplyRow(i, 'item', e.target.value)}
                   />
@@ -335,13 +349,13 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
                     step="0.01"
                     min="0"
                     placeholder="Amount"
-                    className="ldg-meal-amount"
+                    className={`${fieldInput} w-[100px] flex-none`}
                     name="supplyAmount"
                     value={row.amount}
                     onChange={(e) => updateSupplyRow(i, 'amount', e.target.value)}
                     required={i === 0}
                   />
-                  <label className="ldg-checkbox-field ldg-row-checkbox">
+                  <label className={`flex-none whitespace-nowrap ${checkboxLabel}`}>
                     <input
                       type="checkbox"
                       checked={row.capitalAsset}
@@ -351,37 +365,30 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
                   </label>
                   <input type="hidden" name="supplyCapitalAsset" value={row.capitalAsset ? 'true' : 'false'} />
                   {supplyRows.length > 1 && (
-                    <button
-                      type="button"
-                      className="ldg-icon-btn ldg-icon-btn-danger"
-                      onClick={() => removeSupplyRow(i)}
-                    >
+                    <button type="button" className={`flex-none ${iconBtnDanger}`} onClick={() => removeSupplyRow(i)}>
                       Remove
                     </button>
                   )}
                 </div>
                 {Number(row.amount) > 2500 && !row.capitalAsset && (
-                  <p className="ldg-hint ldg-hint-warning">Over $2,500 — consider flagging this as a capital asset.</p>
+                  <p className={`mt-1 ${fieldHintWarning}`}>Over $2,500 — consider flagging this as a capital asset.</p>
                 )}
               </div>
             ))}
-            <button type="button" className="ldg-btn ldg-btn-calc" onClick={addSupplyRow}>+ Add another item</button>
-            <p className="ldg-hint">One row per item in this purchase — they're saved together as a single expense, itemized (click the entry afterward to see the breakdown).</p>
-          </div>
+            <button type="button" className={calcBtn} onClick={addSupplyRow}>+ Add another item</button>
+          </Field>
         </>
       ) : (
         <>
-          <div className="ldg-field">
-            <label htmlFor="amount">Amount ($)</label>
-            <input type="number" step="0.01" min="0" id="amount" name="amount" ref={amountRef} defaultValue={initial?.amount ?? ''} required />
-          </div>
+          <Field label="Amount ($)" htmlFor="amount">
+            <input type="number" step="0.01" min="0" id="amount" name="amount" className={fieldInput} ref={amountRef} defaultValue={initial?.amount ?? ''} required />
+          </Field>
 
-          <div className="ldg-field">
-            <label htmlFor="vendor">{expenseCategoryConfig?.vendorLabel || 'Vendor'}</label>
-            <input type="text" id="vendor" name="vendor" ref={vendorRef} defaultValue={initial?.vendor || ''} />
-          </div>
+          <Field label={expenseCategoryConfig?.vendorLabel || 'Vendor'} htmlFor="vendor">
+            <input type="text" id="vendor" name="vendor" className={fieldInput} ref={vendorRef} defaultValue={initial?.vendor || ''} />
+          </Field>
 
-          <label className="ldg-checkbox-field">
+          <label className={checkboxLabel}>
             <input type="checkbox" name="recurringMonthly" value="true" defaultChecked={Boolean(initial?.recurring_monthly)} />
             Recurring monthly expense (e.g. a software subscription)
           </label>
@@ -390,56 +397,56 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
 
       {isInsurance && (
         <>
-          <div className="ldg-field">
-            <label htmlFor="policyType">Policy type</label>
+          <Field label="Policy type" htmlFor="policyType">
             <input
               type="text"
               id="policyType"
               name="policyType"
+              className={fieldInput}
               defaultValue={initial?.meta?.policyType || ''}
               placeholder="Liability, equipment, health…"
             />
-          </div>
+          </Field>
 
-          <div className="ldg-field">
-            <label htmlFor="billingFrequency">Billing frequency</label>
+          <Field label="Billing frequency" htmlFor="billingFrequency">
             <select
               id="billingFrequency"
               name="billingFrequency"
+              className={fieldInput}
               value={billingFrequency}
               onChange={(e) => setBillingFrequency(e.target.value)}
             >
               <option value="Monthly">Monthly</option>
               <option value="Annual">Annual</option>
             </select>
-          </div>
+          </Field>
 
-          <div className="ldg-field">
-            <label htmlFor="effectiveStart">Effective start date</label>
+          <Field label="Effective start date" htmlFor="effectiveStart">
             <input
               type="date"
               id="effectiveStart"
               name="effectiveStart"
+              className={fieldInput}
               defaultValue={toDateInput(initial?.meta?.effectiveStart)}
               onClick={(e) => e.target.showPicker?.()}
               required
             />
-          </div>
+          </Field>
 
           {billingFrequency === 'Monthly' ? (
-            <div className="ldg-field">
-              <label htmlFor="effectiveEnd">Effective end date</label>
+            <Field label="Effective end date" htmlFor="effectiveEnd">
               <input
                 type="date"
                 id="effectiveEnd"
                 name="effectiveEnd"
+                className={fieldInput}
                 defaultValue={toDateInput(initial?.meta?.effectiveEnd)}
                 onClick={(e) => e.target.showPicker?.()}
                 required
               />
-            </div>
+            </Field>
           ) : (
-            <p className="ldg-hint">End date is automatically set to 12 months after the start date.</p>
+            <p className={fieldHint}>End date is automatically set to 12 months after the start date.</p>
           )}
         </>
       )}
@@ -449,7 +456,7 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
 
         if (field.type === 'checkbox') {
           return (
-            <label className="ldg-checkbox-field" key={field.name}>
+            <label className={checkboxLabel} key={field.name}>
               <input type="checkbox" name={field.name} value="true" defaultChecked={fieldDefault === 'true'} />
               {field.label}
             </label>
@@ -457,10 +464,9 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
         }
 
         return (
-          <div className="ldg-field" key={field.name}>
-            <label htmlFor={field.name}>{field.label}</label>
+          <Field label={field.label} htmlFor={field.name} key={field.name}>
             {field.type === 'select' ? (
-              <select id={field.name} name={field.name} defaultValue={fieldDefault}>
+              <select id={field.name} name={field.name} className={fieldInput} defaultValue={fieldDefault}>
                 {field.options.map((opt) => (
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
@@ -470,6 +476,7 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
                 type={field.type || 'text'}
                 id={field.name}
                 name={field.name}
+                className={fieldInput}
                 ref={(el) => { extraFieldRefs.current[field.name] = el }}
                 placeholder={field.placeholder}
                 defaultValue={fieldDefault}
@@ -477,19 +484,18 @@ export default function ExpenseForm({ action, initial, recentGigs, onCancel }) {
                 {...(field.type === 'number' ? { min: 0, max: 100, step: 1 } : {})}
               />
             )}
-          </div>
+          </Field>
         )
       })}
 
-      <div className="ldg-field">
-        <label htmlFor="description">Description</label>
-        <input type="text" id="description" name="description" ref={descriptionRef} defaultValue={initial?.description || ''} />
-      </div>
+      <Field label="Description" htmlFor="description">
+        <input type="text" id="description" name="description" className={fieldInput} ref={descriptionRef} defaultValue={initial?.description || ''} />
+      </Field>
 
-      <div className="ldg-form-actions">
-        <button type="submit" className="ldg-btn ldg-btn-submit">{isEdit ? 'Save changes' : 'Add expense'}</button>
+      <div className="flex items-center gap-3">
+        <button type="submit" className={submitBtn}>{isEdit ? 'Save changes' : 'Add expense'}</button>
         {isEdit && (
-          <button type="button" className="ldg-btn ldg-btn-cancel" onClick={onCancel}>Cancel</button>
+          <button type="button" className={cancelBtn} onClick={onCancel}>Cancel</button>
         )}
       </div>
     </form>

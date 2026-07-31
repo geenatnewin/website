@@ -5,9 +5,9 @@ import { addGig, editGig, removeGig, addExpense, editExpense, removeExpense, log
 import { mileageDeduction } from './mileage'
 import { formatMoney } from './format'
 import DashboardSections from './DashboardSections'
-import RevealAmount from './RevealAmount'
 import LedgerShell from './LedgerShell'
 import RemindersBanner from './RemindersBanner'
+import StatCard from './StatCard'
 
 export const metadata = { title: 'Dashboard' }
 
@@ -37,29 +37,19 @@ export default async function LedgerDashboard() {
     }
   }
 
+  const netIsNegative = net < 0
+
   return (
     <LedgerShell active="dashboard" logout={logout}>
-      <h1 className="ldg-page-title">Dashboard</h1>
+      <h1 className="mb-6 text-center text-2xl font-extrabold tracking-tight text-white md:text-left">Dashboard</h1>
 
       <RemindersBanner gigs={gigs} expenses={expenses} />
 
-      <section className="ldg-stat-grid">
-        <div className="ldg-stat-card ldg-stat-grad-1">
-          <span className="ldg-stat-label">Income (all-time)</span>
-          <RevealAmount value={`$${formatMoney(totalIncome)}`} />
-        </div>
-        <div className="ldg-stat-card ldg-stat-grad-2">
-          <span className="ldg-stat-label">Expenses (all-time)</span>
-          <RevealAmount value={`$${formatMoney(totalExpenses)}`} />
-        </div>
-        <div className="ldg-stat-card ldg-stat-grad-3">
-          <span className="ldg-stat-label">Mileage deduction</span>
-          <RevealAmount value={`$${formatMoney(totalMileageDeduction)}`} />
-        </div>
-        <div className={`ldg-stat-card ${net < 0 ? 'ldg-stat-grad-critical' : 'ldg-stat-grad-good'}`}>
-          <span className="ldg-stat-label">Net</span>
-          <RevealAmount value={`$${formatMoney(net)}`} />
-        </div>
+      <section className="mb-7 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+        <StatCard label="Income (all-time)" value={`$${formatMoney(totalIncome)}`} rawValue={totalIncome} tone="brand" canGlow />
+        <StatCard label="Expenses (all-time)" value={`$${formatMoney(totalExpenses)}`} rawValue={totalExpenses} tone="neutral" />
+        <StatCard label="Mileage deduction" value={`$${formatMoney(totalMileageDeduction)}`} rawValue={totalMileageDeduction} tone="neutral" />
+        <StatCard label="Net" value={`$${formatMoney(net)}`} rawValue={net} tone={netIsNegative ? 'critical' : 'good'} canGlow />
       </section>
 
       <DashboardSections

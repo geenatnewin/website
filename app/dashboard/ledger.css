@@ -1,7 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ══════════════════════════════
    LEDGER — dark card dashboard
    All classes prefixed `ldg-` to stay isolated from the portfolio's globals.css
    Committed dark theme (no light variant) per explicit visual reference.
+   Tailwind is scoped to /dashboard only (tailwind.config.js `content`), with
+   Preflight off so it doesn't fight globals.css's own reset — see there for
+   the theme extensions (brand/ink colors) new dashboard work should use.
+
+   Everything below the .ldg-root variable block is either: (1) still
+   actively used — RevealAmount.js's censored/revealed blur, or the donut/
+   bar chart SVGs (CategoryDonut.js/QuarterBars.js), which read the
+   --chart-* categorical colors dynamically via template strings, so a
+   plain grep for e.g. "--chart-blue" won't find that usage — or (2) the
+   print-only rules report/page.js's .ldg-print-card/.ldg-print-row opt
+   into. Every other component (sidebar, stat cards, forms, modals, list
+   rows, report/tips/security/login chrome) is Tailwind now, in its own
+   .js file — nothing else in this file backs them.
 ══════════════════════════════ */
 
 .ldg-root {
@@ -18,12 +35,33 @@
   --gridline:       #332c47;
   --border:         rgba(255,255,255,0.08);
 
-  --good:     #22d17e;
-  --warning:  #ffb443;
-  --serious:  #ff8a5c;
-  --critical: #f0525f;
+  /* ── Color roles ── Settled palette: green as the one accent (--accent and
+     --accent2 are intentionally identical now — no second brand hue), red
+     for critical/negative, yellow for pending/warning. --good is the same
+     green as --accent on purpose: "brand" and "positive" are meant to read
+     as the same color in a finance app. Matches tailwind.config.js's `brand`
+     token used by the migrated components — keep these two in sync if
+     either changes. */
+  --accent:        #22d17e;
+  --accent-soft:   #4fe0a0;
+  --accent-glow:   rgba(34, 209, 126, 0.22);
+  --accent-glow-strong: rgba(34, 209, 126, 0.4);
 
-  /* validated dark-mode categorical hues, used only for chart identity */
+  --accent2:       #22d17e;
+  --accent2-soft:  #4fe0a0;
+  --accent2-glow:  rgba(34, 209, 126, 0.2);
+
+  --good:          #22d17e;
+  --good-soft:     #4fe0a0;
+  --good-glow:     rgba(34, 209, 126, 0.22);
+  --warning:       #eab308;
+  --critical:      #f0525f;
+  --critical-soft: #f5838c;
+  --critical-glow: rgba(240, 82, 95, 0.22);
+
+  /* validated dark-mode categorical hues, used only for chart identity —
+     read dynamically (var(--chart-${color})) by CategoryDonut.js and
+     report/page.js's Schedule-C legend dots. */
   --chart-blue:    #3987e5;
   --chart-orange:  #d95926;
   --chart-aqua:    #199e70;
@@ -34,20 +72,12 @@
   --chart-red:     #e66767;
   --chart-muted:   #55506a;
 
-  /* decorative gradients — stat cards only, not data identity */
-  --grad-1: linear-gradient(135deg, #9b3bd1, #e0479e);
-  --grad-2: linear-gradient(135deg, #2f7cf6, #17c9c9);
-  --grad-3: linear-gradient(135deg, #17c9c9, #22d17e);
-  --grad-good: linear-gradient(135deg, #1fae6a, #17c9c9);
-  --grad-critical: linear-gradient(135deg, #f0525f, #e0479e);
-
   position: fixed;
   inset: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background:
-    radial-gradient(ellipse 480px 320px at 8% 92%, rgba(224,71,158,0.16), transparent 60%),
-    radial-gradient(ellipse 520px 380px at 96% 6%, rgba(47,124,246,0.14), transparent 60%),
+    radial-gradient(ellipse 480px 320px at 8% 92%, var(--accent-glow), transparent 60%),
     var(--page);
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -60,138 +90,11 @@
 .ldg-root button { font-family: inherit; }
 .ldg-root input, .ldg-root select, .ldg-root textarea { font-family: inherit; }
 
-/* ── PAGE BG + SHELL ── */
-.ldg-page-bg {
-  min-height: 100%;
-  padding: 1.5rem;
-}
-.ldg-shell {
-  display: flex;
-  align-items: flex-start;
-  max-width: 1280px;
-  margin: 0 auto;
-  border-radius: 22px;
-  overflow: hidden;
-  box-shadow:
-    0 0 120px rgba(155, 59, 209, 0.16),
-    0 0 90px rgba(47, 124, 246, 0.12),
-    0 20px 60px rgba(0,0,0,0.4);
-  border: 1px solid var(--border);
-}
+/* The .ldg-page-bg/.ldg-shell/.ldg-sidebar class names are still applied in
+   LedgerShell.js (empty of rules here on screen — it's all Tailwind there)
+   purely so the @media print block below still has something to select. */
 
-/* ── SIDEBAR ── */
-.ldg-sidebar {
-  width: 220px;
-  flex-shrink: 0;
-  background:
-    radial-gradient(ellipse 260px 200px at 0% 100%, rgba(224, 71, 158, 0.10), transparent 65%),
-    linear-gradient(180deg, #150f20, #0c0a12);
-  padding: 1.75rem 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  min-height: 640px;
-  align-self: stretch;
-}
-.ldg-sidebar-brand {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  transition: color 0.15s;
-}
-.ldg-sidebar-brand:hover { color: var(--text-primary); }
-.ldg-sidebar-group { display: flex; flex-direction: column; gap: 0.4rem; }
-.ldg-sidebar-label {
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  font-weight: 700;
-  margin-bottom: 0.3rem;
-}
-.ldg-sidebar-link {
-  display: block;
-  padding: 0.6rem 0.75rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  background: none;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-  width: 100%;
-  transition: background 0.15s, color 0.15s;
-}
-.ldg-sidebar-link:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
-.ldg-sidebar-link-active {
-  background: var(--grad-1);
-  color: #fff;
-  box-shadow: 0 0 20px rgba(155, 59, 209, 0.55), 0 4px 14px rgba(155, 59, 209, 0.3);
-}
-.ldg-sidebar-link-active:hover { background: var(--grad-1); color: #fff; }
-.ldg-sidebar-logout { margin-top: auto; }
-.ldg-sidebar-link-danger { color: var(--critical); }
-.ldg-sidebar-link-danger:hover { background: rgba(240,82,95,0.12); color: var(--critical); }
-
-/* ── MAIN ── */
-.ldg-main {
-  flex: 1;
-  min-width: 0;
-  background:
-    radial-gradient(ellipse 520px 320px at 100% 0%, rgba(47, 124, 246, 0.10), transparent 60%),
-    radial-gradient(ellipse 460px 300px at 0% 100%, rgba(23, 201, 201, 0.08), transparent 60%),
-    var(--main);
-  padding: 2rem 2.25rem 2.5rem;
-}
-
-.ldg-page-title {
-  font-size: 1.7rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  color: var(--text-primary);
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-.ldg-report-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-.ldg-report-header .ldg-page-title { margin-bottom: 0; text-align: left; }
-
-/* ── STAT CARDS ── */
-.ldg-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.75rem;
-}
-.ldg-stat-card {
-  border-radius: 16px;
-  padding: 1.25rem 1.35rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-}
-.ldg-stat-label {
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.85;
-  font-weight: 700;
-}
-.ldg-stat-card strong { font-size: 1.55rem; font-weight: 800; }
-.ldg-stat-grad-1 { background: var(--grad-1); box-shadow: 0 10px 32px rgba(155, 59, 209, 0.45), 0 8px 24px rgba(0,0,0,0.25); }
-.ldg-stat-grad-2 { background: var(--grad-2); box-shadow: 0 10px 32px rgba(47, 124, 246, 0.4), 0 8px 24px rgba(0,0,0,0.25); }
-.ldg-stat-grad-3 { background: var(--grad-3); box-shadow: 0 10px 32px rgba(23, 201, 201, 0.4), 0 8px 24px rgba(0,0,0,0.25); }
-.ldg-stat-grad-good { background: var(--grad-good); box-shadow: 0 10px 32px rgba(34, 209, 126, 0.4), 0 8px 24px rgba(0,0,0,0.25); }
-.ldg-stat-grad-critical { background: var(--grad-critical); box-shadow: 0 10px 32px rgba(240, 82, 95, 0.4), 0 8px 24px rgba(0,0,0,0.25); }
-
-/* ── CENSORED AMOUNTS (click to reveal) ── */
+/* ── CENSORED AMOUNTS (click to reveal) — RevealAmount.js ── */
 .ldg-censored,
 .ldg-revealed {
   cursor: pointer;
@@ -204,557 +107,8 @@
 }
 .ldg-censored:hover { filter: blur(6px); }
 
-/* ── REMINDERS ── */
-.ldg-reminders { margin-bottom: 1.75rem; }
-.ldg-reminder-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--gridline);
-}
-.ldg-reminder-row:last-of-type { border-bottom: none; }
-.ldg-reminder-icon { flex-shrink: 0; }
-.ldg-reminder-warning { color: var(--text-primary); }
-.ldg-reminder-warning strong { color: var(--warning); }
-.ldg-reminder-link {
-  display: inline-block;
-  margin-top: 0.75rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--chart-blue);
-}
-.ldg-reminder-link:hover { opacity: 0.8; }
-
-/* ── TIPS ── */
-.ldg-tip { padding: 1rem 0; border-bottom: 1px solid var(--gridline); }
-.ldg-tip:last-child { border-bottom: none; }
-.ldg-tip-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.35rem; }
-.ldg-tip-body { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
-
-/* ── GENERIC CARD ── */
-.ldg-card {
-  background: linear-gradient(155deg, #261f36 0%, #1d1829 100%);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 1.5rem 1.6rem;
-  margin-bottom: 1.5rem;
-}
-.ldg-card-title {
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  font-weight: 700;
-  margin-bottom: 1.1rem;
-}
-
-/* ── MONTH GROUPS (Gigs/Expenses lists) ── */
-.ldg-month-group { margin-bottom: 0.6rem; }
-.ldg-month-group:last-child { margin-bottom: 0; }
-.ldg-month-header {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  width: 100%;
-  border: none;
-  background: var(--card-alt);
-  border-radius: 10px;
-  padding: 0.7rem 0.9rem;
-  cursor: pointer;
-  text-align: left;
-}
-.ldg-month-header:hover { background: #2e2540; }
-.ldg-month-header:focus-visible { outline: 2px solid #2f7cf6; outline-offset: 2px; }
-.ldg-month-label { font-weight: 700; font-size: 0.88rem; color: var(--text-primary); }
-.ldg-month-meta { margin-left: auto; font-size: 0.76rem; color: var(--text-muted); white-space: nowrap; }
-.ldg-month-body { padding-top: 0.6rem; }
-
-/* ── ADD BUTTONS / FORMS ── */
-.ldg-add-section { margin-bottom: 1.5rem; }
-.ldg-add-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
-.ldg-box-add { display: flex; flex-direction: column; align-items: center; margin-bottom: 1.75rem; }
-.ldg-box-add .ldg-form { width: 100%; }
-.ldg-form {
-  margin-top: 1.25rem;
-  padding: 1.5rem 1.6rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.1rem;
-  background: linear-gradient(155deg, #261f36 0%, #1d1829 100%);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  max-width: 480px;
-}
-.ldg-form-title {
-  font-size: 0.72rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-}
-.ldg-field { display: flex; flex-direction: column; gap: 0.4rem; }
-.ldg-field label {
-  font-size: 0.72rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  font-weight: 600;
-}
-.ldg-field input,
-.ldg-field select,
-.ldg-field textarea {
-  border: 1px solid var(--border);
-  background: var(--main);
-  padding: 0.65rem 0.75rem;
-  font-size: 0.95rem;
-  color: var(--text-primary);
-  outline: none;
-  border-radius: 8px;
-  width: 100%;
-}
-.ldg-field input:focus,
-.ldg-field select:focus,
-.ldg-field textarea:focus { border-color: #2f7cf6; }
-.ldg-field textarea { resize: vertical; min-height: 70px; }
-.ldg-hint { font-size: 0.72rem; color: var(--text-muted); margin-top: -0.2rem; }
-.ldg-hint-error { color: var(--critical); }
-.ldg-hint-warning { color: var(--warning); }
-
-.ldg-receipt-preview {
-  max-width: 160px;
-  max-height: 160px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  object-fit: cover;
-  display: block;
-  transition: opacity 0.15s;
-}
-
-.ldg-receipt-preview-btn {
-  align-self: flex-start;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-radius: 8px;
-}
-.ldg-receipt-preview-btn:hover .ldg-receipt-preview { opacity: 0.85; }
-.ldg-receipt-preview-btn:focus-visible { outline: 2px solid #2f7cf6; outline-offset: 2px; }
-
-.ldg-receipt-preview-sm { max-width: 72px; max-height: 72px; }
-.ldg-receipt-pdf-chip {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--card-alt);
-  color: var(--text-secondary);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-decoration: none;
-  text-align: center;
-}
-.ldg-receipt-pending {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  align-items: flex-start;
-  margin-top: 0.4rem;
-}
-.ldg-receipt-pending-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-}
-.ldg-expense-receipts { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-
-.ldg-checkbox-field {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-.ldg-checkbox-field input { width: auto; }
-.ldg-row-checkbox { flex: 0 0 auto; white-space: nowrap; }
-
-.ldg-inline-field { display: flex; gap: 0.5rem; }
-.ldg-inline-field input { flex: 1; min-width: 0; }
-
-.ldg-meal-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
-.ldg-meal-row input { flex: 1; min-width: 0; }
-.ldg-meal-row .ldg-meal-amount { flex: 0 0 100px; }
-.ldg-meal-row .ldg-icon-btn { flex: 0 0 auto; }
-.ldg-btn-calc {
-  align-self: stretch;
-  padding: 0.65rem 1.1rem;
-  font-size: 0.68rem;
-  background: var(--card-alt);
-  border-radius: 8px;
-  white-space: nowrap;
-}
-.ldg-btn-calc:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.ldg-btn {
-  align-self: flex-start;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
-  border-radius: 999px;
-  color: #fff;
-  background: var(--card-alt);
-  transition: opacity 0.15s, transform 0.1s, box-shadow 0.2s;
-}
-.ldg-btn:hover { opacity: 0.88; }
-.ldg-btn:active { transform: scale(0.98); }
-.ldg-btn-gig { background: var(--grad-1); box-shadow: 0 4px 18px rgba(155, 59, 209, 0.35); }
-.ldg-btn-gig:hover { box-shadow: 0 6px 24px rgba(155, 59, 209, 0.55); }
-.ldg-btn-expense { background: var(--grad-2); box-shadow: 0 4px 18px rgba(47, 124, 246, 0.35); }
-.ldg-btn-expense:hover { box-shadow: 0 6px 24px rgba(47, 124, 246, 0.55); }
-.ldg-btn-active { background: var(--card-alt); box-shadow: none; }
-.ldg-btn-submit { background: var(--grad-good); margin-top: 0.25rem; box-shadow: 0 4px 18px rgba(34, 209, 126, 0.35); }
-.ldg-btn-submit:hover { box-shadow: 0 6px 24px rgba(34, 209, 126, 0.55); }
-
-.ldg-toast {
-  position: fixed;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 999;
-  padding: 0.6rem 1.4rem;
-  background: var(--good);
-  color: #0d0d0d;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  border-radius: 999px;
-  box-shadow: 0 0 28px rgba(34, 209, 126, 0.55), 0 8px 24px rgba(0, 0, 0, 0.35);
-  pointer-events: none;
-  animation: ldg-toast-fade 1.8s ease forwards;
-}
-@keyframes ldg-toast-fade {
-  0% { opacity: 0; transform: translateX(-50%) translateY(8px); }
-  12% { opacity: 1; transform: translateX(-50%) translateY(0); }
-  78% { opacity: 1; transform: translateX(-50%) translateY(0); }
-  100% { opacity: 0; transform: translateX(-50%) translateY(-4px); }
-}
-.ldg-btn-cancel { background: var(--card-alt); }
-.ldg-btn-danger { background: var(--grad-critical); box-shadow: 0 4px 18px rgba(240, 82, 95, 0.35); }
-.ldg-btn-danger:hover { box-shadow: 0 6px 24px rgba(240, 82, 95, 0.55); }
-.ldg-form-actions { display: flex; gap: 0.75rem; align-items: center; }
-
-/* ── CONFIRM MODAL ── */
-.ldg-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(10, 8, 14, 0.72);
-  backdrop-filter: blur(3px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  animation: ldg-modal-fade-in 0.15s ease;
-}
-@keyframes ldg-modal-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.ldg-modal {
-  background: linear-gradient(155deg, #261f36 0%, #1d1829 100%);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 1.6rem 1.75rem;
-  max-width: 380px;
-  width: 100%;
-  box-shadow: 0 0 60px rgba(240, 82, 95, 0.18), 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: ldg-modal-pop-in 0.18s ease;
-}
-@keyframes ldg-modal-pop-in {
-  from { opacity: 0; transform: scale(0.96) translateY(6px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-.ldg-modal-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.6rem;
-}
-.ldg-modal-message {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 1.4rem;
-}
-/* ── RECEIPT LIGHTBOX (reuses .ldg-modal-overlay for the backdrop) ── */
-.ldg-receipt-lightbox {
-  position: relative;
-  max-width: 100%;
-  max-height: 100%;
-  display: flex;
-}
-.ldg-receipt-lightbox-img {
-  max-width: 100%;
-  max-height: 85vh;
-  object-fit: contain;
-  border-radius: 10px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-.ldg-receipt-lightbox-close {
-  position: absolute;
-  top: -0.75rem;
-  right: -0.75rem;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  border: none;
-  background: var(--card-alt);
-  color: var(--text-primary);
-  font-size: 1rem;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-}
-
-.ldg-modal-actions {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: flex-end;
-}
-
-.ldg-entry-controls { display: flex; gap: 0.3rem; margin-left: 0.5rem; }
-.ldg-entry-controls-sm { margin-left: 0.75rem; }
-.ldg-entry-controls form { display: inline; }
-.ldg-icon-btn {
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 0.66rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  font-weight: 700;
-  cursor: pointer;
-  padding: 0.25rem 0.55rem;
-  border-radius: 6px;
-  transition: background 0.15s, color 0.15s;
-}
-.ldg-icon-btn:hover { background: var(--card-alt); color: var(--text-primary); }
-.ldg-icon-btn-danger:hover { background: var(--critical); color: #fff; }
-
-/* ── LISTS ── */
+/* ── DONUT + BAR CHARTS — CategoryDonut.js / QuarterBars.js ── */
 .ldg-empty { color: var(--text-muted); font-size: 0.9rem; }
-
-.ldg-entry {
-  padding: 1rem 1.1rem;
-  margin-bottom: 0.6rem;
-  background: linear-gradient(155deg, #2c2340 0%, #221c31 100%);
-  border-radius: 12px;
-  border-left: 4px solid var(--chart-muted);
-}
-.ldg-entry:last-child { margin-bottom: 0; }
-.ldg-entry-photography { border-left-color: var(--chart-blue); }
-.ldg-entry-videography { border-left-color: var(--chart-violet); }
-.ldg-entry-dj { border-left-color: var(--chart-orange); }
-.ldg-entry-other { border-left-color: var(--chart-muted); }
-
-.ldg-entry-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.9rem;
-  font-size: 0.88rem;
-}
-.ldg-entry-num { color: var(--text-muted); }
-.ldg-entry-client { font-weight: 700; }
-.ldg-entry-type {
-  text-transform: uppercase;
-  font-size: 0.65rem;
-  letter-spacing: 0.06em;
-  font-weight: 700;
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
-  color: #fff;
-}
-.ldg-type-photography { background: var(--chart-blue); }
-.ldg-type-videography { background: var(--chart-violet); }
-.ldg-type-dj { background: var(--chart-orange); }
-.ldg-type-other { background: var(--chart-muted); }
-
-.ldg-entry-amount { margin-left: auto; font-weight: 700; font-size: 1rem; }
-
-.ldg-status {
-  font-size: 0.62rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-weight: 700;
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
-  color: #0d0d0d;
-}
-.ldg-status-paid { background: var(--good); }
-.ldg-status-pending { background: var(--warning); }
-
-.ldg-entry-sub { font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.5rem; }
-.ldg-expense-row {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-top: 0.45rem;
-  padding: 0.35rem 0 0.35rem 1.1rem;
-  border-left: 2px solid var(--gridline);
-}
-.ldg-expense-amount { margin-left: auto; font-weight: 600; color: var(--chart-orange); }
-.ldg-expense-meta {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  padding-left: 1.1rem;
-  margin-top: -0.2rem;
-  margin-bottom: 0.3rem;
-  font-style: italic;
-}
-
-/* ── EXPANDABLE ROWS (click a gig/expense row to reveal extra fields) ── */
-.ldg-row-expandable { cursor: pointer; }
-.ldg-row-expandable:hover { background: rgba(255, 255, 255, 0.04); border-radius: 6px; }
-.ldg-row-expandable:focus-visible { outline: 2px solid #2f7cf6; outline-offset: 2px; border-radius: 6px; }
-.ldg-row-chevron {
-  display: inline-block;
-  flex: 0 0 auto;
-  font-size: 0.6rem;
-  color: var(--text-muted);
-  transition: transform 0.15s;
-}
-.ldg-row-chevron-open { transform: rotate(90deg); }
-
-.ldg-expense-details {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  padding: 0.3rem 0 0.4rem 1.1rem;
-  margin-top: -0.15rem;
-  margin-bottom: 0.3rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
-}
-.ldg-expense-details-receipt { padding-left: 0; }
-
-.ldg-expense-items {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  width: 100%;
-  margin-bottom: 0.15rem;
-}
-.ldg-expense-item-row {
-  display: flex;
-  gap: 1rem;
-  justify-content: space-between;
-  font-size: 0.8rem;
-}
-.ldg-expense-item-row span:last-child { color: var(--text-primary); font-weight: 600; flex: 0 0 auto; }
-
-/* ── LOGIN ── */
-.ldg-login-wrap {
-  min-height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-.ldg-login-box {
-  width: 100%;
-  max-width: 320px;
-  text-align: center;
-  background: linear-gradient(155deg, #261f36 0%, #1d1829 100%);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 2.5rem 2rem;
-  box-shadow: 0 0 100px rgba(155, 59, 209, 0.14), 0 20px 60px rgba(0,0,0,0.4);
-}
-.ldg-login-box .ldg-brand { font-size: 1.1rem; font-weight: 700; }
-.ldg-login-form { display: flex; flex-direction: column; gap: 0.9rem; margin-top: 1.5rem; text-align: left; }
-.ldg-label {
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  font-weight: 600;
-}
-.ldg-input {
-  border: 1px solid var(--border);
-  background: var(--main);
-  padding: 0.75rem 0.85rem;
-  font-size: 0.95rem;
-  color: var(--text-primary);
-  outline: none;
-  border-radius: 8px;
-}
-.ldg-input:focus { border-color: #2f7cf6; }
-.ldg-error { color: var(--critical); font-size: 0.82rem; font-weight: 600; }
-
-/* ── REPORT ── */
-.ldg-report-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-.ldg-report-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.65rem 0;
-  border-bottom: 1px solid var(--gridline);
-  font-size: 0.88rem;
-}
-.ldg-report-row:last-child { border-bottom: none; }
-.ldg-report-row.ldg-report-income { color: var(--good); font-weight: 700; }
-.ldg-report-row.ldg-report-total {
-  border-top: 2px solid var(--border);
-  border-bottom: none;
-  font-weight: 700;
-  margin-top: 0.25rem;
-  padding-top: 0.85rem;
-  font-size: 0.95rem;
-}
-.ldg-report-row.ldg-report-total.ldg-positive { color: var(--good); }
-.ldg-report-row.ldg-report-total.ldg-negative { color: var(--critical); }
-.ldg-report-sub { color: var(--text-muted); font-size: 0.72rem; margin-left: 0.5rem; }
-
-.ldg-badge {
-  display: inline-block;
-  font-size: 0.62rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  font-weight: 700;
-  padding: 0.15rem 0.45rem;
-  border-radius: 999px;
-  margin-left: 0.4rem;
-  color: #0d0d0d;
-}
-.ldg-badge-warning { background: var(--warning); }
-
 .ldg-legend-dot {
   display: inline-block;
   width: 9px;
@@ -763,67 +117,32 @@
   margin-right: 0.5rem;
   vertical-align: middle;
 }
-
-/* ── DONUT CHART ── */
 .ldg-donut-wrap { display: flex; align-items: center; gap: 1.75rem; flex-wrap: wrap; }
-.ldg-donut { width: 160px; height: 160px; flex-shrink: 0; filter: drop-shadow(0 0 16px rgba(155, 59, 209, 0.3)); }
+.ldg-donut { width: 160px; height: 160px; flex-shrink: 0; filter: drop-shadow(0 0 10px var(--accent-glow)); }
 .ldg-donut-legend { list-style: none; display: flex; flex-direction: column; gap: 0.55rem; font-size: 0.82rem; }
 .ldg-donut-legend li { display: flex; align-items: center; color: var(--text-secondary); }
 .ldg-legend-value { margin-left: 0.6rem; font-weight: 600; color: var(--text-primary); }
 
-/* ── BAR CHART ── */
 .ldg-bar-chart { width: 100%; height: 170px; }
 .ldg-bar-zeroline { stroke: var(--gridline); stroke-width: 1; }
 .ldg-bar-good { fill: var(--good); }
 .ldg-bar-critical { fill: var(--critical); }
-.ldg-bar-current { stroke: #fff; stroke-width: 2; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.55)); }
+.ldg-bar-current { stroke: #fff; stroke-width: 2; filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4)); }
 .ldg-bar-label { fill: var(--text-secondary); font-size: 11px; font-family: inherit; }
 .ldg-bar-value { fill: var(--text-primary); font-size: 10px; font-weight: 600; font-family: inherit; }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 900px) {
-  .ldg-stat-grid { grid-template-columns: 1fr 1fr; }
-  .ldg-report-grid { grid-template-columns: 1fr; }
+/* Keyframes kept — referenced by Tailwind's arbitrary animate-[ldg-toast-fade_...]
+   in DashboardSections.js. */
+@keyframes ldg-toast-fade {
+  0% { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  12% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  78% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-4px); }
 }
+
+/* ── RESPONSIVE ── */
 @media (max-width: 720px) {
-  .ldg-month-header { flex-wrap: wrap; row-gap: 0.2rem; }
-  .ldg-month-meta { margin-left: 1.4rem; }
-  .ldg-page-bg { padding: 0; }
-  .ldg-shell { flex-direction: column; border-radius: 0; }
-  .ldg-sidebar {
-    width: 100%;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    min-height: 0;
-    padding: 1rem 1.25rem;
-  }
-  .ldg-sidebar-group { flex-direction: row; align-items: center; gap: 0.5rem; }
-  .ldg-sidebar-label { display: none; }
-  .ldg-sidebar-logout { margin-top: 0; margin-left: auto; }
-  .ldg-main { padding: 1.5rem 1.25rem 2rem; }
-  .ldg-stat-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-  .ldg-stat-card { padding: 1rem; }
-  .ldg-stat-card strong { font-size: 1.25rem; }
-  .ldg-form { max-width: 100%; padding: 1.25rem; }
-  .ldg-add-buttons { flex-direction: column; }
-  .ldg-add-buttons .ldg-btn { width: 100%; text-align: center; }
-  .ldg-entry-head { gap: 0.6rem; }
-  .ldg-entry-amount { margin-left: 0; width: 100%; order: 10; font-size: 1.1rem; }
-  .ldg-entry-controls { margin-left: 0; width: 100%; order: 11; }
-  .ldg-expense-row { flex-wrap: wrap; row-gap: 0.15rem; }
-  .ldg-expense-amount { margin-left: 0; width: 100%; order: 10; }
-  .ldg-expense-row .ldg-entry-controls-sm { margin-left: 0; width: 100%; order: 11; }
   .ldg-donut-wrap { flex-direction: column; align-items: flex-start; }
-  /* Prevent iOS auto-zoom on focus */
-  .ldg-field input, .ldg-field select, .ldg-field textarea, .ldg-input { font-size: 16px; }
-  /* Item name was shrinking to a sliver next to the fixed-width amount, checkbox
-     label, and Remove button all fighting for space on one line — wrap the
-     checkbox/Remove onto their own row so the item name stays readable. */
-  .ldg-meal-row { flex-wrap: wrap; }
-  .ldg-meal-row input:not(.ldg-meal-amount) { flex-basis: 140px; min-width: 140px; }
-  .ldg-meal-row .ldg-row-checkbox { margin-left: auto; }
 }
 
 /* ── PRINT (report page) ── */
@@ -834,14 +153,16 @@
   .ldg-shell { box-shadow: none; border: none; }
   .ldg-sidebar { display: none; }
   .ldg-no-print { display: none !important; }
-  .ldg-card {
+  /* Print-only marker classes report/page.js opts into — no non-print rule
+     targets them, so no cascade fight with Tailwind utilities on screen. */
+  .ldg-print-card {
     border: 1px solid #ccc;
     background: #fff;
     color: #000;
     page-break-inside: avoid;
     break-inside: avoid;
   }
-  .ldg-report-row {
+  .ldg-print-row {
     color: #000;
     border-color: #ddd;
     page-break-inside: avoid;
