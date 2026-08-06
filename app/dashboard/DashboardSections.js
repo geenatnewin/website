@@ -12,7 +12,7 @@ import { formatMoney } from './format'
 // everything else = neutral outline. Replaces the old violet-for-Gigs /
 // blue-for-Expenses split — that inconsistent second hue was flagged
 // directly ("don't like the purple and blue badges").
-function ToggleTab({ label, active, onClick }) {
+function ToggleTab({ label, active, onClick, badge }) {
   return (
     <button
       type="button"
@@ -24,6 +24,10 @@ function ToggleTab({ label, active, onClick }) {
       }
     >
       {label}
+      {/* Reuses the same yellow already meaning "pending" on gig status badges elsewhere — not a new accent color. */}
+      {badge > 0 && (
+        <span className="ml-2 rounded-full bg-yellow-500/25 px-2 py-0.5 text-[0.65rem] text-yellow-300">{badge}</span>
+      )}
     </button>
   )
 }
@@ -71,7 +75,7 @@ export default function DashboardSections({
   removeExpense,
   recentGigs,
 }) {
-  const [openBox, setOpenBox] = useState(null) // null | 'gigs' | 'expenses'
+  const [openBox, setOpenBox] = useState(null) // null | 'gigs' | 'expenses' | 'missing'
   const [showAddGig, setShowAddGig] = useState(false)
   const [showAddExpense, setShowAddExpense] = useState(false)
   const [gigFormKey, setGigFormKey] = useState(0)
@@ -109,11 +113,23 @@ export default function DashboardSections({
   const gigMonths = groupByMonth(gigs, 'gig_date')
   const expenseMonths = groupByMonth(generalExpenses, 'expense_date')
 
+  // Oldest-first — the longer a gig has sat unpaid, the more it deserves a follow-up.
+  const unpaidGigs = gigs
+    .filter((g) => g.status === 'pending')
+    .sort((a, b) => new Date(a.gig_date) - new Date(b.gig_date))
+  const unpaidTotal = unpaidGigs.reduce((s, g) => s + Number(g.gross_payment), 0)
+
   return (
     <>
       <section className="mb-6 flex flex-wrap gap-3">
         <ToggleTab label="Gigs" active={openBox === 'gigs'} onClick={() => toggleBox('gigs')} />
         <ToggleTab label="Expenses" active={openBox === 'expenses'} onClick={() => toggleBox('expenses')} />
+        <ToggleTab
+          label="Missing Payment"
+          active={openBox === 'missing'}
+          onClick={() => toggleBox('missing')}
+          badge={unpaidGigs.length}
+        />
       </section>
 
       {openBox === 'gigs' && (
@@ -190,6 +206,38 @@ export default function DashboardSections({
               ))}
             </MonthSection>
           ))}
+        </section>
+      )}
+
+      {openBox === 'missing' && (
+        <section className="mb-6 rounded-2xl border border-white/[0.06] bg-ink-900 p-5 md:p-6">
+          <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+            <p className="text-xs font-bold uppercase tracking-widest text-white/40">Missing Payment</p>
+            {unpaidGigs.length > 0 && (
+              <p className="text-sm text-white/55">
+                <span className="font-bold text-yellow-400">${formatMoney(unpaidTotal)}</span> across{' '}
+                {unpaidGigs.length} gig{unpaidGigs.length === 1 ? '' : 's'}
+              </p>
+            )}
+          </div>
+
+          {unpaidGigs.length === 0 ? (
+            <p className="text-sm text-white/40">🎉 Nothing outstanding — every gig is marked paid.</p>
+          ) : (
+            unpaidGigs.map((g) => (
+              <GigEntry
+                key={g.id}
+                gig={g}
+                displayNum={gigDisplayNums.get(g.id)}
+                expenses={expensesByGig[g.id] || []}
+                editGig={editGig}
+                removeGig={removeGig}
+                editExpense={editExpense}
+                removeExpense={removeExpense}
+                recentGigs={recentGigs}
+              />
+            ))
+          )}
         </section>
       )}
 
